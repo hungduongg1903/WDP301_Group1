@@ -1,7 +1,4 @@
-const courtRouter = require("./court.router");
+const authRouter = require("./auth.router.js");
+const courtRouter = require("./court.router.js");
 
-
-module.exports = {
-  courtRouter,
-
-};
+module.exports = { authRouter, courtRouter };
