@@ -1,10 +1,17 @@
-import { motion } from "framer-motion";
-import Input from "../components/Input";
-import { Loader, Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import PasswordStrengthMeter from "../components/PasswordStrengthMeter";
 import { useAuthStore } from "../store/authStore";
+import {
+  TextField,
+  Button,
+  CircularProgress,
+  Typography,
+  Link,
+  Box,
+} from "@mui/material";
+import { Mail, Lock, User } from "lucide-react";
+import { motion } from "framer-motion";
+import PasswordStrengthMeter from "../components/PasswordStrengthMeter";
+import { useNavigate } from "react-router-dom";
 
 const SignUpPage = () => {
   const [name, setName] = useState("");
@@ -17,7 +24,6 @@ const SignUpPage = () => {
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-
     try {
       await signup(email, password, name, phone);
       navigate("/verify-email");
@@ -25,78 +31,137 @@ const SignUpPage = () => {
       console.log(error);
     }
   };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="max-w-md w-full bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl 
-			overflow-hidden"
+    <Box
+      sx={{
+        minHeight: "100vh", // Ensure it covers the entire screen height
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
     >
-      <div className="p-8">
-        <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-green-400 to-emerald-500 text-transparent bg-clip-text">
-          Create Account
-        </h2>
-
-        <form onSubmit={handleSignUp}>
-          <Input
-            icon={User}
-            type="text"
-            placeholder="Full Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <Input
-            icon={Mail}
-            type="email"
-            placeholder="Email Address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <Input
-            icon={Mail}
-            type="number"
-            placeholder="Phone No"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
-          <Input
-            icon={Lock}
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          {error && <p className="text-red-500 font-semibold mt-2">{error}</p>}
-          <PasswordStrengthMeter password={password} />
-
-          <motion.button
-            className="mt-5 w-full py-3 px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white 
-						font-bold rounded-lg shadow-lg hover:from-green-600
-						hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
-						 focus:ring-offset-gray-900 transition duration-200"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            type="submit"
-            disabled={isLoading}
+      <Box
+        sx={{
+          maxWidth: 400,
+          width: "100%",
+          padding: 4,
+          backgroundColor: "white", // White background for the form
+          borderRadius: 2,
+          boxShadow: 3,
+        }}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Typography
+            variant="h4"
+            align="center"
+            sx={{
+              fontWeight: "bold",
+              marginBottom: 3,
+              background:
+                "linear-gradient(to right,rgb(52, 137, 211),rgb(16, 134, 185))",
+              backgroundClip: "text",
+              color: "transparent",
+            }}
           >
-            {isLoading ? (
-              <Loader className=" animate-spin mx-auto" size={24} />
-            ) : (
-              "Sign Up"
+            Create Account
+          </Typography>
+
+          <form onSubmit={handleSignUp}>
+            <TextField
+              fullWidth
+              label="Full Name"
+              type="text"
+              variant="outlined"
+              margin="normal"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              InputProps={{
+                startAdornment: <User sx={{ color: "gray", marginRight: 1 }} />,
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Email Address"
+              type="email"
+              variant="outlined"
+              margin="normal"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              InputProps={{
+                startAdornment: <Mail sx={{ color: "gray", marginRight: 1 }} />,
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Phone No"
+              type="number"
+              variant="outlined"
+              margin="normal"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              InputProps={{
+                startAdornment: <Mail sx={{ color: "gray", marginRight: 1 }} />,
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Password"
+              type="password"
+              variant="outlined"
+              margin="normal"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              InputProps={{
+                startAdornment: <Lock sx={{ color: "gray", marginRight: 1 }} />,
+              }}
+            />
+            {error && (
+              <Typography color="error" variant="body2" gutterBottom>
+                {error}
+              </Typography>
             )}
-          </motion.button>
-        </form>
-      </div>
-      <div className="px-8 py-4 bg-gray-900 bg-opacity-50 flex justify-center">
-        <p className="text-sm text-gray-400">
-          Already have an account?{" "}
-          <Link to={"/login"} className="text-green-400 hover:underline">
-            Login
-          </Link>
-        </p>
-      </div>
-    </motion.div>
+            <PasswordStrengthMeter password={password} />
+
+            <Button
+              fullWidth
+              variant="contained"
+              color="success"
+              type="submit"
+              disabled={isLoading}
+              sx={{
+                padding: "12px 0",
+                fontWeight: "bold",
+                marginTop: 2,
+                background:
+                  "linear-gradient(to right,rgb(52, 137, 211),rgb(16, 134, 185))",
+                "&:hover": { backgroundColor: "#10b981" },
+              }}
+            >
+              {isLoading ? (
+                <CircularProgress size={24} sx={{ color: "white" }} />
+              ) : (
+                "Sign Up"
+              )}
+            </Button>
+          </form>
+
+          <Box sx={{ display: "flex", justifyContent: "center", marginTop: 2 }}>
+            <Typography variant="body2" color="textSecondary">
+              Already have an account?{" "}
+              <Link href="/login" color="rgb(52, 137, 211)">
+                Login
+              </Link>
+            </Typography>
+          </Box>
+        </motion.div>
+      </Box>
+    </Box>
   );
 };
+
 export default SignUpPage;

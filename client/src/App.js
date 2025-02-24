@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import FloatingShape from "./components/FloatingShape";
+// import FloatingShape from "./components/FloatingShape";
 
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
@@ -62,7 +62,7 @@ function App() {
         "flex items-center justify-center relative overflow-hidden"
       }
     >
-      <FloatingShape
+      {/* <FloatingShape
         color="bg-green-500"
         size="w-64 h-64"
         top="-5%"
@@ -82,7 +82,7 @@ function App() {
         top="40%"
         left="-10%"
         delay={2}
-      />
+      /> */}
 
       <Routes>
         <Route

@@ -1,89 +1,80 @@
-const {
-  PASSWORD_RESET_REQUEST_TEMPLATE,
-  PASSWORD_RESET_SUCCESS_TEMPLATE,
-  VERIFICATION_EMAIL_TEMPLATE,
-} = require("./emailTemplates.js");
-const { mailtrapClient, sender } = require("./mailtrap.config.js");
+const { PASSWORD_RESET_REQUEST_TEMPLATE, PASSWORD_RESET_SUCCESS_TEMPLATE, VERIFICATION_EMAIL_TEMPLATE } = require("./emailTemplates.js");
+const { transporter, sender } = require("./mailtrap.config.js");
 
+// Send verification email
 const sendVerificationEmail = async (email, verificationToken) => {
-  const recipient = [{ email }];
-
   try {
-    const response = await mailtrapClient.send({
+    console.log("co vao day 1", sender);
+    console.log("co vao day 2", email);
+
+    const response = await transporter.sendMail({
       from: sender,
-      to: recipient,
+      to: email,
       subject: "Verify your email",
       html: VERIFICATION_EMAIL_TEMPLATE.replace(
         "{verificationCode}",
         verificationToken
       ),
-      category: "Email Verification",
     });
 
-    console.log("Email sent successfully", response);
+    console.log("Verification email sent:", response.messageId);
   } catch (error) {
-    console.error(`Error sending verification`, error);
-    throw new Error(`Error sending verification email: ${error}`);
+    console.error("Error sending verification email:", error);
+    throw new Error("Error sending verification email");
   }
 };
 
+// Send welcome email
 const sendWelcomeEmail = async (email, name) => {
-  const recipient = [{ email }];
-
   try {
-    const response = await mailtrapClient.send({
+    const response = await transporter.sendMail({
       from: sender,
-      to: recipient,
-      template_uuid: "08886b88-1ba4-4caa-ad8e-bd2801779203",
-      template_variables: { name },
+      to: email,
+      subject: "Welcome to Our Service!",
+      html: `<p>Hello ${name}, welcome to our service!</p>`,
     });
 
-    console.log("Email sent successfully", response);
+    console.log("Welcome email sent:", response.messageId);
   } catch (error) {
-    console.error(`Error sending welcome email`, error);
-    throw new Error(`Error sending welcome email: ${error}`);
+    console.error("Error sending welcome email:", error);
+    throw new Error("Error sending welcome email");
   }
 };
 
+// Send forgot password email
 const sendForgotPasswordEmail = async (email, resetURL) => {
-  const recipient = [{ email }];
-
   try {
-    const response = await mailtrapClient.send({
+    const response = await transporter.sendMail({
       from: sender,
-      to: recipient,
-      subject: "Verify your email",
+      to: email,
+      subject: "Password Reset Request",
       html: PASSWORD_RESET_REQUEST_TEMPLATE.replace("{resetURL}", resetURL),
-      category: "Password Reset",
     });
 
-    console.log("Email sent successfully", response);
+    console.log("Password reset request email sent:", response.messageId);
   } catch (error) {
-    console.error(`Error sending verification`, error);
-    throw new Error(`Error sending verification email: ${error}`);
+    console.error("Error sending password reset email:", error);
+    throw new Error("Error sending password reset email");
   }
 };
 
+// Send password reset success email
 const sendResetSuccessEmail = async (email) => {
-  const recipient = [{ email }];
-
   try {
-    const response = await mailtrapClient.send({
+    const response = await transporter.sendMail({
       from: sender,
-      to: recipient,
+      to: email,
       subject: "Password Reset Successful",
       html: PASSWORD_RESET_SUCCESS_TEMPLATE,
-      category: "Password Reset",
     });
 
-    console.log("Password reset email sent successfully", response);
+    console.log("Password reset success email sent:", response.messageId);
   } catch (error) {
-    console.error(`Error sending password reset success email`, error);
-    throw new Error(`Error sending password reset success email: ${error}`);
+    console.error("Error sending password reset success email:", error);
+    throw new Error("Error sending password reset success email");
   }
 };
 
-// Exporting all functions using CommonJS
 module.exports = {
   sendVerificationEmail,
   sendWelcomeEmail,
