@@ -1,19 +1,34 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/authStore";
-import { TextField, Button, CircularProgress, Typography, Link, Box } from "@mui/material";
+import {
+  TextField,
+  Button,
+  CircularProgress,
+  Typography,
+  Link,
+  Box,
+} from "@mui/material";
 import { Mail, Lock } from "lucide-react";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
+
   const { login, isLoading, error } = useAuthStore();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     const data = await login(email, password);
-    if (data.user !== null) {
-      window.location.href = "/courts";
+    // Get the user data from localStorage
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (user !== null) {
+      // Check if the user is an admin
+      if (user.isAdmin) {
+        window.location.href = "/dashboard";
+      } else {
+        window.location.href = "/courts";
+      }
     }
   };
 
@@ -36,7 +51,18 @@ const LoginPage = () => {
           boxShadow: 3,
         }}
       >
-        <Typography variant="h4" align="center" sx={{ fontWeight: "bold", marginBottom: 3, background: "linear-gradient(to right,rgb(52, 137, 211),rgb(16, 134, 185))", backgroundClip: "text", color: "transparent" }}>
+        <Typography
+          variant="h4"
+          align="center"
+          sx={{
+            fontWeight: "bold",
+            marginBottom: 3,
+            background:
+              "linear-gradient(to right,rgb(52, 137, 211),rgb(16, 134, 185))",
+            backgroundClip: "text",
+            color: "transparent",
+          }}
+        >
           Welcome Back
         </Typography>
 
@@ -50,12 +76,10 @@ const LoginPage = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             InputProps={{
-              startAdornment: (
-                <Mail sx={{ color: "gray", marginRight: 1 }} />
-              ),
+              startAdornment: <Mail sx={{ color: "gray", marginRight: 1 }} />,
             }}
           />
-          
+
           <TextField
             fullWidth
             label="Password"
@@ -65,19 +89,26 @@ const LoginPage = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             InputProps={{
-              startAdornment: (
-                <Lock sx={{ color: "gray", marginRight: 1 }} />
-              ),
+              startAdornment: <Lock sx={{ color: "gray", marginRight: 1 }} />,
             }}
           />
 
-          <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom={2}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            marginBottom={2}
+          >
             <Link href="/forgot-password" variant="body2" color="textSecondary">
               Forgot password?
             </Link>
           </Box>
 
-          {error && <Typography color="error" variant="body2" gutterBottom>{error}</Typography>}
+          {error && (
+            <Typography color="error" variant="body2" gutterBottom>
+              {error}
+            </Typography>
+          )}
 
           <Button
             fullWidth
@@ -89,8 +120,9 @@ const LoginPage = () => {
               padding: "12px 0",
               fontWeight: "bold",
               marginTop: 2,
-              background: "linear-gradient(to right,rgb(52, 137, 211),rgb(16, 134, 185))",
-              '&:hover': { backgroundColor: "#10b981" },
+              background:
+                "linear-gradient(to right,rgb(52, 137, 211),rgb(16, 134, 185))",
+              "&:hover": { backgroundColor: "#10b981" },
             }}
           >
             {isLoading ? (
