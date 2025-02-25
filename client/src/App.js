@@ -72,6 +72,14 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
+                <CourtPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
                 <DashboardPage />
               </ProtectedRoute>
             }

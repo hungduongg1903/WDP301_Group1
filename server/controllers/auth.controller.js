@@ -33,6 +33,7 @@ const register = async (req, res) => {
       email,
       password: hashedPassword,
       name,
+      username: email,
       phone,
       verificationToken: verificationCode,
       verificationTokenExpireAt: verificationTokenExpireAt,
@@ -107,7 +108,9 @@ const verifyemail = async (req, res) => {
       "verificationTokenExpireAt email name isVerified"
     );
     if (!user) {
-      return res.status(400).json({ message: "Invalid or expired verification code" });
+      return res
+        .status(400)
+        .json({ message: "Invalid or expired verification code" });
     }
     if (user.verificationTokenExpireAt < Date.now()) {
       return res.status(400).json({ message: "Verification code expired" });
@@ -119,7 +122,9 @@ const verifyemail = async (req, res) => {
     await user.save();
     await sendWelcomeEmail(user.email, user.name);
 
-    return res.status(200).json({ message: "Email verified successfully", user });
+    return res
+      .status(200)
+      .json({ message: "Email verified successfully", user });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
@@ -164,7 +169,9 @@ const resetPassword = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(400).json({ success: false, message: "Invalid or expired reset token" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid or expired reset token" });
     }
 
     const hashedPassword = await bcryptjs.hash(password, 10);
@@ -175,7 +182,9 @@ const resetPassword = async (req, res) => {
 
     await sendResetSuccessEmail(user.email);
 
-    res.status(200).json({ success: true, message: "Password reset successful" });
+    res
+      .status(200)
+      .json({ success: true, message: "Password reset successful" });
   } catch (error) {
     console.log("Error in resetPassword ", error);
     res.status(400).json({ success: false, message: error.message });
@@ -184,10 +193,11 @@ const resetPassword = async (req, res) => {
 
 const checkAuth = async (req, res) => {
   try {
-    
     const user = await User.findById(req.userId).select("-password");
     if (!user) {
-      return res.status(400).json({ success: false, message: "User not found" });
+      return res
+        .status(400)
+        .json({ success: false, message: "User not found" });
     }
 
     res.status(200).json({ success: true, user });
