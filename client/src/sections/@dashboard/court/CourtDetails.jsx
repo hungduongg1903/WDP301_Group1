@@ -50,7 +50,7 @@ const CourtDetails = () => {
       })
       .catch((error) => {
         console.error('Error fetching court details:', error);
-        toast.error('Failed to fetch court details');
+        // toast.error('Failed to fetch court details');
         setIsLoading(false);
       });
   }, [id]);

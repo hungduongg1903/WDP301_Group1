@@ -7,7 +7,7 @@ import EmailVerificationPage from "./pages/EmailVerificationPage";
 import DashboardPage from "./pages/DashboardPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
-import CourtDetails from './sections/@dashboard/court/CourtDetails'
+import CourtDetails from "./sections/@dashboard/court/CourtDetails";
 import LoadingSpinner from "./components/LoadingSpinner";
 
 import { Toaster } from "react-hot-toast";
@@ -72,10 +72,13 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <CourtPage />
+                <LibraryApp />
               </ProtectedRoute>
             }
-          />
+          >
+            {/* <Route index element={<CourtPage />} />
+            <Route path=":id" element={<CourtDetails />} /> */}
+          </Route>
           <Route
             path="/profile"
             element={
@@ -93,7 +96,16 @@ function App() {
             }
           />
           {/* <Route path="/dashboard2" element={<LibraryApp />} /> */}
-          <Route path="/courts" element={<CourtPage />} />
+          <Route
+            path="/courts"
+            element={
+              <ProtectedRoute>
+                <LibraryApp />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<CourtPage />} />
+          </Route>
 
           <Route path="/verify-email" element={<EmailVerificationPage />} />
 
@@ -110,10 +122,20 @@ function App() {
             path="/courts/:id"
             element={
               <ProtectedRoute>
-                <CourtDetails />
+                <LibraryApp />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route
+              index
+              element={
+                <ProtectedRoute>
+                  <CourtDetails />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
+
           {/* catch all routes */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
