@@ -7,7 +7,7 @@ import EmailVerificationPage from "./pages/EmailVerificationPage";
 import DashboardPage from "./pages/DashboardPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
-
+import CourtDetails from './sections/@dashboard/court/CourtDetails'
 import LoadingSpinner from "./components/LoadingSpinner";
 
 import { Toaster } from "react-hot-toast";
@@ -95,6 +95,15 @@ function App() {
               <RedirectAuthenticatedUser>
                 <ResetPasswordPage />
               </RedirectAuthenticatedUser>
+            }
+          />
+
+          <Route
+            path="/courts/:id"
+            element={
+              <ProtectedRoute>
+                <CourtDetails />
+              </ProtectedRoute>
             }
           />
           {/* catch all routes */}

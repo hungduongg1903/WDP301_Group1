@@ -8,8 +8,6 @@ import { styled } from '@mui/material/styles';
 import shuffle from 'lodash.shuffle';
 import { apiUrl, routes, methods } from '../../../constants';
 import Label from '../../../components/label';
-import BorrowalForm from '../borrowal/BorrowalForm';
-import BorrowalFormForUser from '../borrowal/BorowalFormForUser';
 import { useAuth } from '../../../hooks/useAuth';
 import ImageGallery from 'react-image-gallery';
 import 'react-image-gallery/styles/css/image-gallery.css';
@@ -20,19 +18,10 @@ const TruncatedTypography = styled(Typography)({
 
 const CourtDetails = () => {
   const { user } = useAuth();
-  const [borrowal, setBorrowal] = useState({
-    bookId: '',
-    memberId: '',
-    borrowedDate: '',
-    dueDate: '',
-    status: '',
-  });
   
   const { id } = useParams();
   const navigate = useNavigate();
-  const [book, setCourt] = useState(null);
-  const [author, setAuthor] = useState(null);
-  const [genre, setGenre] = useState(null);
+  const [court, setCourt] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [relatedCourts, setRelatedCourts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,32 +31,26 @@ const CourtDetails = () => {
   const getCourt = useCallback(() => {
     setIsLoading(true);
     axios
-      .get(apiUrl(routes.BOOK, methods.GET, id), { withCredentials: true })
+      .get(apiUrl(routes.COURT, methods.GET, id), { withCredentials: true })
       .then((response) => {
-        const bookData = response.data.book;
-        setCourt(bookData);
+        const courtData = response.data.court;
+        console.log(response.data)
+        setCourt(courtData);
         return Promise.all([
-          axios.get(apiUrl(routes.AUTHOR, methods.GET, bookData.authorId), { withCredentials: true }),
-          axios.get(apiUrl(routes.GENRE, methods.GET, bookData.genreId), { withCredentials: true }),
+          // axios.get(apiUrl(routes.AUTHOR, methods.GET, courtData.authorId), { withCredentials: true }),
+          // axios.get(apiUrl(routes.GENRE, methods.GET, courtData.genreId), { withCredentials: true }),
         ]);
       })
-      .then(([authorResponse, genreResponse]) => {
-        setAuthor(authorResponse.data.author);
-        setGenre(genreResponse.data.genre);
-        // Fetch related books
-        return axios.get(apiUrl(routes.BOOKS_BY_GENRE, methods.GET, genreResponse.data.genre._id), {
-          withCredentials: true,
-        });
-      })
       .then((relatedCourtsResponse) => {
-        const relatedCourts = relatedCourtsResponse.data.books.filter((b) => b._id !== id);
+        console.log(relatedCourtsResponse.data)
+        const relatedCourts = relatedCourtsResponse.data.court.filter((b) => b._id !== id);
         const shuffledCourts = shuffle(relatedCourts).slice(0, 5);
         setRelatedCourts(shuffledCourts);
         setIsLoading(false);
       })
       .catch((error) => {
-        console.error('Error fetching book details:', error);
-        toast.error('Failed to fetch book details');
+        console.error('Error fetching court details:', error);
+        toast.error('Failed to fetch court details');
         setIsLoading(false);
       });
   }, [id]);
@@ -76,23 +59,10 @@ const CourtDetails = () => {
     getCourt();
   }, [getCourt]);
 
-  const addBorrowal = () => {
-    axios
-      .post(apiUrl(routes.BORROWAL, methods.POST), borrowal)
-      .then((response) => {
-        toast.success('Borrowal added successfully');
-        handleCloseBorrowalModal();
-        clearBorrowForm();
-      })
-      .catch((error) => {
-        console.error('Error adding borrowal:', error);
-        toast.error('Failed to add borrowal');
-      });
-  };
 
   const addReview = () => {
     const reviewData = {
-      book: id,
+      court: id,
       reviewedBy: user?._id,
       review,
       reviewedAt: new Date(),
@@ -120,7 +90,7 @@ const CourtDetails = () => {
     );
   }
 
-  if (!book || !author || !genre) {
+  if (!court) {
     return (
       <Container>
         <Typography variant="h5">Court not found</Typography>
@@ -130,17 +100,21 @@ const CourtDetails = () => {
 
   const images = [
     {
-      original: book.photoUrl,
-      thumbnail: book.photoUrl,
+      original: court.court_photo,
+      thumbnail: court.court_photo,
     },
-    ...book.pageUrls.map((url) => ({
-      original: url,
-      thumbnail: url,
-    })),
+    {
+      original: court.court_photo,
+      thumbnail: court.court_photo,
+    },
+    // ...court.pageUrls.map((url) => ({
+    //   original: url,
+    //   thumbnail: url,
+    // })),
   ];
 
   const backToCourtPage = () => {
-    navigate('/books');
+    navigate('/courts');
   };
 
   const handleOpenBorrowalModal = () => {
@@ -151,33 +125,25 @@ const CourtDetails = () => {
     setIsBorrowalModalOpen(false);
   };
 
-  const clearBorrowForm = () => {
-    setBorrowal({
-      bookId: '',
-      memberId: '',
-      borrowedDate: '',
-      dueDate: '',
-      status: '',
-    });
-  };
+  
 
   return (
     <Container>
       <Helmet>
-        <title>{book.name} - Court Details</title>
+        <title>{court.court_name} - Court Details</title>
       </Helmet>
 
       <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
         <Link component={RouterLink} to="/">
           Dashboard
         </Link>
-        <Link component={RouterLink} to="/books">
+        <Link component={RouterLink} to="/courts">
           Courts
         </Link>
-        <Link component={RouterLink} to={`/genre/${genre._id}`}>
+        {/* <Link component={RouterLink} to={`/genre/${genre._id}`}>
           {genre.name}
-        </Link>
-        <Typography color="text.primary">{book.name}</Typography>
+        </Link> */}
+        <Typography color="text.primary">{court.court_name}</Typography>
       </Breadcrumbs>
 
       <Button variant="outlined" color="primary" onClick={backToCourtPage} sx={{ mb: 2 }}>
@@ -190,42 +156,31 @@ const CourtDetails = () => {
         </Grid>
         <Grid item xs={12} sm={8} style={{ paddingLeft: '3rem' }}>
           <Box>
-            <Typography variant="h3">{book.name}</Typography>
-            <Label color={book.isAvailable ? 'success' : 'error'} sx={{ mt: 1, mb: 2 }}>
-              {book.isAvailable ? 'Available' : 'Not available'}
-            </Label>
-            <Typography
-              variant="subtitle1"
-              sx={{ color: '#888888', mt: 2, display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-              onClick={() => navigate(`/author/${author._id}`)}
-            >
-              <Avatar alt={author.name} src={author.photoUrl} /> {author.name}
-            </Typography>
-            <Box sx={{ position: 'relative', mt: 2 }}>
-              <TruncatedTypography variant="body1">{book.summary}</TruncatedTypography>
-            </Box>
+            <Typography variant="h3">{court.court_name}</Typography>
+            {/* <Label color={court.isAvailable ? 'success' : 'error'} sx={{ mt: 1, mb: 2 }}>
+              {court.isAvailable ? 'Available' : 'Not available'}
+            </Label> */}
+          
+            
             <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>
-              ISBN: {book.isbn}
+              {court.court_name}
             </Typography>
             <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>
-              GENRE: {genre.name}
+              Giá thuê sân: {court.price} 000 VND/Giờ
             </Typography>
-            <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>
-              LANGUAGE: English
-            </Typography>
-            <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>
-              PAGES: 240p
-            </Typography>
+            <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>Mở cửa: 6:00 sáng - 10:00 tối</Typography>
+            <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>Tiện nghi: Cho thuê vợt và bóng, Nhà vệ sinh tại chỗ, Đài phun nước, Khu vực ngồi có mái che</Typography>
+            <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>An toàn: Sân được bảo trì thường xuyên để đảm bảo an toàn cho người chơi</Typography>
             <Button
               variant="contained"
               color="primary"
               sx={{ mt: 2 }}
-              onClick={(e) => {
-                setSelectedCourtId(book._id);
-                handleOpenBorrowalModal(e);
-              }}
+              // onClick={(e) => {
+              //   setSelectedCourtId(court._id);
+              //   handleOpenBorrowalModal(e);
+              // }}
             >
-              Borrow
+              Đặt sân ngay
             </Button>
           </Box>
         </Grid>
@@ -260,7 +215,7 @@ const CourtDetails = () => {
           <Typography variant="h6" sx={{ mt: 2 }}>
             Related Courts
           </Typography>
-          {relatedCourts.map((relatedCourt) => (
+          {/* {relatedCourts.map((relatedCourt) => (
             <Grid item xs={12} sm={2} key={relatedCourt._id} style={{ paddingLeft: '3rem' }}>
               <Card>
                 <Box sx={{ position: 'relative' }}>
@@ -268,17 +223,17 @@ const CourtDetails = () => {
                   <Typography
                     variant="subtitle2"
                     sx={{ mt: 2, textAlign: 'center', cursor: 'pointer' }}
-                    onClick={() => navigate(`/books/${relatedCourt._id}`)}
+                    onClick={() => navigate(/courts/${relatedCourt._id})}
                   >
                     {relatedCourt.name}
                   </Typography>
                 </Box>
               </Card>
             </Grid>
-          ))}
+          ))} */}
         </Grid>
 
-        {user && (user.isAdmin || user.isLibrarian) ? (
+        {/* {user && (user.isAdmin || user.isLibrarian) ? (
           <BorrowalForm
           isModalOpen={isBorrowalModalOpen}
           handleCloseModal={handleCloseBorrowalModal}
@@ -286,7 +241,7 @@ const CourtDetails = () => {
           borrowal={borrowal}
           setBorrowal={setBorrowal}
           handleAddBorrowal={addBorrowal}
-          bookName = {book.name}
+          courtName = {court.name}
           />
         ) : (
           <BorrowalFormForUser
@@ -296,12 +251,11 @@ const CourtDetails = () => {
           borrowal={borrowal}
           setBorrowal={setBorrowal}
           handleAddBorrowal={addBorrowal}
-          bookName = {book.name}
+          courtName = {court.name}
           />
-        )}
+        )} */}
       </Container>
     );
   };
 
   export default CourtDetails;
-
