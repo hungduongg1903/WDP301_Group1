@@ -46,10 +46,23 @@ export default function Router() {
   ]);
 
 
-  const guestRoutes = useRoutes([
-    { path: "courts", element: <CourtPage /> },
+const guestRoutes = useRoutes([
+    {
+      path: "/",
+      element: <Navigate to="/landing-page" replace />, 
+    },
+    {
+      path: "courts",
+      element: <LibraryApp />, 
+      children: [
+        { index: true, element: <CourtPage /> }, 
+        { path: ":id", element: <CourtDetails /> },
+        // ...commonRoutes
+      ],
+    },
+    { path: "landing-page", element: <LandingPage /> },
     { path: "404", element: <Page404 /> },
-    { path: "*", element: <Navigate to="/courts" replace /> },
+    { path: "*", element: <Navigate to="/landing-page" replace /> },
   ]);
 
 
