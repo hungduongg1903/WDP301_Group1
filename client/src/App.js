@@ -16,11 +16,11 @@ import { useEffect } from "react";
 import DashboardAppPage from "./sections/@dashboard/app/DashboardAppPage";
 import CourtPage from "./sections/@dashboard/court/CourtPage";
 import LibraryApp from "./layouts/dashboard";
+import LandingPage from "./pages/LandingPage";
 
 // protect routes that require authentication
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, user } = useAuthStore();
-  console.log(isAuthenticated, user);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -72,7 +72,7 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <LibraryApp />
+                <LandingPage />
               </ProtectedRoute>
             }
           >

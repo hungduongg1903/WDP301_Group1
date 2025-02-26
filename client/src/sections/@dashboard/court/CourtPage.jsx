@@ -1,7 +1,7 @@
-import { Helmet } from 'react-helmet-async';
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import toast from 'react-hot-toast';
+import { Helmet } from "react-helmet-async";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import toast from "react-hot-toast";
 import {
   Box,
   Button,
@@ -26,53 +26,53 @@ import {
   Alert,
   InputAdornment,
   TextField,
-} from '@mui/material';
-import { Link } from 'react-router-dom';
-import { styled } from '@mui/material/styles';
-import { useAuth } from '../../../hooks/useAuth';
-import Scrollbar from '../../../components/scrollbar';
-import Label from '../../../components/label';
-import CourtDialog from './CourtDialog';
-import CourtForm from './CourtForm';
-import Iconify from '../../../components/iconify';
-import { apiUrl, methods, routes } from '../../../constants';
-import ImportCourtsModal from './ImportCourtsModal';
+} from "@mui/material";
+import { Link } from "react-router-dom";
+import { styled } from "@mui/material/styles";
+import { useAuth } from "../../../hooks/useAuth";
+import Scrollbar from "../../../components/scrollbar";
+import Label from "../../../components/label/index";
+import CourtDialog from "./CourtDialog";
+import CourtForm from "./CourtForm";
+import Iconify from "../../../components/iconify";
+import { apiUrl, methods, routes } from "../../../constants";
+import ImportCourtsModal from "./ImportCourtsModal";
+import { useAuthStore } from "../../../store/authStore";
 
-const StyledCourtImage = styled('img')({
+const StyledCourtImage = styled("img")({
   top: 0,
-  width: '100%',
-  height: '100%',
-  objectFit: 'cover',
-  position: 'absolute',
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  position: "absolute",
 });
 
 const TruncatedTypography = styled(Typography)({
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  display: '-webkit-box',
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  display: "-webkit-box",
   WebkitLineClamp: 5,
-  WebkitBoxOrient: 'vertical',
-  position: 'relative',
-  '&::after': {
+  WebkitBoxOrient: "vertical",
+  position: "relative",
+  "&::after": {
     content: '"..."',
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     right: 0,
-    background: 'white',
+    background: "white",
   },
 });
 
 const CourtPage = () => {
-  // const { user } = useAuth();
-  const  user = { isAdmin: false };
+  const { user } = useAuthStore();
 
   const [Court, setCourt] = useState({
-    id: '',
-    court_name: '',
-    isbn: '',
+    id: "",
+    court_name: "",
+    isbn: "",
     // isAvailable: true,
-    court_photo: '',
-    status: '',
+    court_photo: "",
+    status: "",
     // pageUrls: [],
     // position: '',
   });
@@ -85,28 +85,28 @@ const CourtPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isUpdateForm, setIsUpdateForm] = useState(false);
-  const [filterName, setFilterName] = useState('');
-  const [filterIsAvailable, setFilterIsAvailable] = useState('');
+  const [filterName, setFilterName] = useState("");
+  const [filterIsAvailable, setFilterIsAvailable] = useState("");
 
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(6);
-  const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('name');
+  const [order, setOrder] = useState("asc");
+  const [orderBy, setOrderBy] = useState("name");
 
   const getAllCourts = () => {
     axios
       .get(apiUrl(routes.COURT, methods.GET_ALL))
       .then((response) => {
-        console.log("dcm")
-        console.log(response.data.courtsList)
+        console.log("dcm");
+        console.log(response.data.courtsList);
         setCourts(response.data.courtsList);
         setFilteredCourts(response.data.courtsList);
         setIsTableLoading(false);
       })
       .catch((error) => {
-        console.error('Error fetching Courts:', error);
-        toast.error('Failed to fetch Courts');
+        console.error("Error fetching Courts:", error);
+        toast.error("Failed to fetch Courts");
       });
   };
 
@@ -114,14 +114,14 @@ const CourtPage = () => {
     axios
       .post(apiUrl(routes.COURT, methods.POST), Court)
       .then((response) => {
-        toast.success('Court added successfully');
+        toast.success("Court added successfully");
         handleCloseModal();
         getAllCourts();
         clearForm();
       })
       .catch((error) => {
-        console.error('Error adding Court:', error);
-        toast.error('Failed to add Court');
+        console.error("Error adding Court:", error);
+        toast.error("Failed to add Court");
       });
   };
 
@@ -129,15 +129,15 @@ const CourtPage = () => {
     axios
       .put(apiUrl(routes.COURT, methods.PUT, selectedCourtId), Court)
       .then((response) => {
-        toast.success('Court updated successfully');
+        toast.success("Court updated successfully");
         handleCloseModal();
         handleCloseMenu();
         getAllCourts();
         clearForm();
       })
       .catch((error) => {
-        console.error('Error updating Court:', error);
-        toast.error('Failed to update Court');
+        console.error("Error updating Court:", error);
+        toast.error("Failed to update Court");
       });
   };
 
@@ -145,34 +145,32 @@ const CourtPage = () => {
     axios
       .delete(apiUrl(routes.COURT, methods.DELETE, CourtId))
       .then((response) => {
-        toast.success('Court deleted successfully');
+        toast.success("Court deleted successfully");
         handleCloseDialog();
         handleCloseMenu();
         getAllCourts();
       })
       .catch((error) => {
-        console.error('Error deleting Court:', error);
-        toast.error('Failed to delete Court');
+        console.error("Error deleting Court:", error);
+        toast.error("Failed to delete Court");
       });
   };
 
-
-
- 
-
   const getSelectedCourtDetails = () => {
-    const selectedCourt = Courts.find((element) => element._id === selectedCourtId);
+    const selectedCourt = Courts.find(
+      (element) => element._id === selectedCourtId
+    );
     setCourt(selectedCourt);
   };
 
   const clearForm = () => {
     setCourt({
-      id: '',
-      court_name: '',
-      isbn: '',
+      id: "",
+      court_name: "",
+      isbn: "",
       // isAvailable: true,
-      court_photo: '',
-      status: '',
+      court_photo: "",
+      status: "",
       // pageUrls: [],
       // position: '',
     });
@@ -215,11 +213,13 @@ const CourtPage = () => {
   }, []);
 
   useEffect(() => {
-    if (filterName.trim() === '' && filterIsAvailable === '') {
+    if (filterName.trim() === "" && filterIsAvailable === "") {
+
+      console.log("Courts")
+      console.log(Courts)
       setFilteredCourts(Courts);
     } else {
       let filteredResults = Courts;
-
 
       setFilteredCourts(filteredResults);
     }
@@ -247,10 +247,10 @@ const CourtPage = () => {
   // }
 
   const tableHeadCells = [
-    { id: 'courtPhoto', label: 'Photo', alignRight: false },
-    { id: 'courtName', label: 'Name', alignRight: false },
-    { id: 'status', label: 'Availability', alignRight: false },
-    { id: 'createdAt', label: 'Created At', alignRight: false },
+    { id: "courtPhoto", label: "Photo", alignRight: false },
+    { id: "courtName", label: "Name", alignRight: false },
+    { id: "status", label: "Availability", alignRight: false },
+    { id: "createdAt", label: "Created At", alignRight: false },
     // { id: 'actions', label: 'Actions', alignRight: true },
   ];
 
@@ -260,7 +260,7 @@ const CourtPage = () => {
         {tableHeadCells.map((headCell) => (
           <TableCell
             key={headCell.id}
-            align={headCell.alignRight ? 'right' : 'left'}
+            align={headCell.alignRight ? "right" : "left"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
             {headCell.label}
@@ -272,44 +272,54 @@ const CourtPage = () => {
 
   const renderTableBody = () => (
     <TableBody>
-      {filteredCourts.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((Court) => {
-        console.log("Court dcm ")
-        console.log(Court)
-        const { _id, court_photo, court_name, status, } = Court;
+      {filteredCourts
+        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+        .map((court) => {
+          console.log("Court dcm ");
+          console.log(court);
+          const { _id, court_photo, court_name, status } = court;
 
-        return (
-          <TableRow key={_id}>
-            <TableCell>
-              <img src={court_photo} alt={court_name} width="100" height="100" />
-            </TableCell>
-            <TableCell>
-              <Link to={`/Courts/${_id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                {court_name}
-              </Link>
-            </TableCell>
-            {/* <TableCell>{position}</TableCell> */}
-        
-            <TableCell>
-              <Label color={status ? 'success' : 'error'} sx={{ padding: 2 }}>
-                {status ? 'Available' : 'Not available'}
-              </Label>
-            </TableCell>
-            {/* <TableCell>{formatDate(createdAt)}</TableCell> */}
-            <TableCell align="right">
-              <IconButton
-                size="small"
-                color="primary"
-                onClick={(e) => {
-                  setSelectedCourtId(Court._id);
-                  handleOpenMenu(e);
-                }}
-              >
-                <Iconify icon={'eva:more-vertical-fill'} />
-              </IconButton>
-            </TableCell>
-          </TableRow>
-        );
-      })}
+          return (
+            <TableRow key={_id}>
+              <TableCell>
+                <img
+                  src={court_photo}
+                  alt={court_name}
+                  width="100"
+                  height="100"
+                />
+              </TableCell>
+              <TableCell>
+                <Link
+                  to={`/Courts/${_id}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  {court_name}
+                </Link>
+              </TableCell>
+              {/* <TableCell>{position}</TableCell> */}
+
+              {/* <TableCell>
+                <Label color={status ? "active" : "error"} sx={{ padding: 2 }}>
+                  {status ? "active" : "Not available"}
+                </Label>
+              </TableCell> */}
+              {/* <TableCell>{formatDate(createdAt)}</TableCell> */}
+              <TableCell align="right">
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={(e) => {
+                    setSelectedCourtId(_id);
+                    handleOpenMenu(e);
+                  }}
+                >
+                  <Iconify icon={"eva:more-vertical-fill"} />
+                </IconButton>
+              </TableCell>
+            </TableRow>
+          );
+        })}
     </TableBody>
   );
 
@@ -320,13 +330,22 @@ const CourtPage = () => {
       </Helmet>
 
       <Container maxWidth="lg">
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          mb={5}
+        >
           <Typography variant="h4" gutterBottom>
             Courts
           </Typography>
           {user.isAdmin === true || user.isLibrarian === true ? (
             <Stack direction="row" spacing={2}>
-              <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />} onClick={handleOpenModal}>
+              <Button
+                variant="contained"
+                startIcon={<Iconify icon="eva:plus-fill" />}
+                onClick={handleOpenModal}
+              >
                 New Court
               </Button>
               <Button
@@ -339,7 +358,7 @@ const CourtPage = () => {
                 Import Courts
               </Button>
             </Stack>
-          ): null}
+          ) : null}
         </Stack>
 
         <Stack direction="row" spacing={2} mb={5}>
@@ -356,8 +375,7 @@ const CourtPage = () => {
               ),
             }}
           />
-   
-         
+
           <Select
             displayEmpty
             value={filterIsAvailable}
@@ -373,7 +391,7 @@ const CourtPage = () => {
         </Stack>
 
         {isTableLoading ? (
-          <Grid padding={2} style={{ textAlign: 'center' }}>
+          <Grid padding={2} style={{ textAlign: "center" }}>
             <CircularProgress />
           </Grid>
         ) : user.isAdmin || user.isLibrarian ? (
@@ -399,7 +417,7 @@ const CourtPage = () => {
           </Card>
         ) : filteredCourts.length > 0 ? (
           <div>
-          <TablePagination
+            <TablePagination
               component="div"
               count={filteredCourts.length}
               page={page}
@@ -412,49 +430,54 @@ const CourtPage = () => {
             <Grid container spacing={3}>
               {filteredCourts
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((Court) => (
-                  <Grid key={Court._id} item xs={12} sm={6} md={4}>
-                <Card>
-                  <Box sx={{ pt: '80%', position: 'relative' }}>
-  
-                    {(user.isAdmin || user.isLibrarian) && (
-                      <Label
-                        variant="filled"
-                        sx={{
-                          zIndex: 9,
-                          top: 12,
-                          right: 16,
-                          position: 'absolute',
-                          borderRadius: '100%',
-                          width: '30px',
-                          height: '30px',
-                          color: 'white',
-                          backgroundColor: 'white',
-                        }}
-                      >
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={(e) => {
-                            setSelectedCourtId(Court._id);
-                            handleOpenMenu(e);
-                          }}
+                .map((court) => (
+                  <Grid key={court._id} item xs={12} sm={6} md={4}>
+                    <Card>
+                      <Box sx={{ pt: "80%", position: "relative" }}>
+                        {(user.isAdmin || user.isLibrarian) && (
+                          <Label
+                            variant="filled"
+                            sx={{
+                              zIndex: 9,
+                              top: 12,
+                              right: 16,
+                              position: "absolute",
+                              borderRadius: "100%",
+                              width: "30px",
+                              height: "30px",
+                              color: "white",
+                              backgroundColor: "white",
+                            }}
+                          >
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={(e) => {
+                                setSelectedCourtId(court._id);
+                                handleOpenMenu(e);
+                              }}
+                            >
+                              <Iconify icon={"eva:more-vertical-fill"} />
+                            </IconButton>
+                          </Label>
+                        )}
+
+                        <StyledCourtImage
+                          alt={court.court_name}
+                          src={court.court_photo}
+                        />
+                      </Box>
+
+                      <Stack spacing={1} sx={{ p: 2 }}>
+                        <Link
+                          to={`/Courts/${court._id}`}
+                          style={{ textDecoration: "none", color: "inherit" }}
                         >
-                          <Iconify icon={'eva:more-vertical-fill'} />
-                        </IconButton>
-                      </Label>
-                    )}
-
-                    <StyledCourtImage alt={Court.court_name} src={Court.court_photo} />
-                  </Box>
-
-                  <Stack spacing={1} sx={{ p: 2 }}>
-                    <Link to={`/Courts/${Court._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <Typography textAlign="center" variant="h5" noWrap>
-                        {Court.court_name}
-                      </Typography>
-                    </Link>
-                    {/* <Typography
+                          <Typography textAlign="center" variant="h5" noWrap>
+                            {court.court_name}
+                          </Typography>
+                        </Link>
+                        {/* <Typography
                       variant="subtitle1"
                       sx={{ color: '#888888' }}
                       paddingBottom={1}
@@ -465,22 +488,30 @@ const CourtPage = () => {
                     </Typography>
                     <Label color={Court.isAvailable ? 'success' : 'error'} sx={{ padding: 2 }}>
                       {Court.isAvailable ? 'Available' : 'Not available'}
-                    </Label>
-
+                    </Label> */}
+                    <Label color={court.status == "A" ? 'success' : 'error'} sx={{ padding: 2 }}>
+                      {court.status == "A" ? 'Available' : 'Not available'}
+                    </Label> 
                     <Typography variant="subtitle2" textAlign="center" paddingTop={1}>
-                      ISBN: {Court.isbn}
-                    </Typography> */}
-                    <TruncatedTypography variant="body2">{Court.court_name}</TruncatedTypography>
-                  </Stack>
-                </Card>
-              </Grid>
+                      PRICE: {court.price} $
+                    </Typography>
+                        <TruncatedTypography variant="body2">
+                          {court.court_name}
+                        </TruncatedTypography>
+                      </Stack>
+                    </Card>
+                  </Grid>
                 ))}
             </Grid>
-            </div>
+          </div>
         ) : (
           <>
-          
-            <Stack direction="row" alignItems="center" justifyContent="space-between" mb={0}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              mb={0}
+            >
               <Button
                 variant="contained"
                 component={Link}
@@ -500,8 +531,7 @@ const CourtPage = () => {
                   onChange={(e) => setFilterName(e.target.value)}
                   placeholder="Search by name"
                 />
-               
-                
+
                 <Select
                   value={filterIsAvailable}
                   onChange={(e) => setFilterIsAvailable(e.target.value)}
@@ -529,11 +559,11 @@ const CourtPage = () => {
             <Grid container spacing={3}>
               {filteredCourts
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((Court) => (
-                  <Grid key={Court._id} item xs={12} sm={6} md={4}>
+                .map((court) => (
+                  <Grid key={court._id} item xs={12} sm={6} md={4}>
                     <Card>
-                      <Box sx={{ pt: '100%', position: 'relative' }}>
-                        {Court.isAvailable && (
+                      <Box sx={{ pt: "100%", position: "relative" }}>
+                        {court.isAvailable && (
                           <Label
                             variant="filled"
                             color="info"
@@ -541,43 +571,57 @@ const CourtPage = () => {
                               zIndex: 9,
                               top: 16,
                               right: 16,
-                              position: 'absolute',
-                              textTransform: 'uppercase',
+                              position: "absolute",
+                              textTransform: "uppercase",
                             }}
                           >
                             Available
                           </Label>
                         )}
-                        <StyledCourtImage alt={Court.name} src={Court.photoUrl} />
+                        <StyledCourtImage
+                          alt={court.court_name}
+                          src={court.court_photo}
+                        />
                       </Box>
 
                       <Stack spacing={2} sx={{ p: 3 }}>
-                        <Stack direction="row" alignItems="center" justifyContent="space-between">
+                        <Stack
+                          direction="row"
+                          alignItems="center"
+                          justifyContent="space-between"
+                        >
                           <Typography variant="subtitle1" noWrap>
-                            {Court.name}
+                            {court.name}
                           </Typography>
                           <IconButton
                             size="large"
                             color="inherit"
                             onClick={(event) => {
                               handleOpenMenu(event);
-                              setSelectedCourtId(Court._id);
+                              setSelectedCourtId(court._id);
                             }}
                           >
                             <Iconify icon="eva:more-vertical-fill" />
                           </IconButton>
                         </Stack>
 
-                        <Typography variant="body2" color="text.secondary" noWrap>
-                          ISBN: {Court.isbn}
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          noWrap
+                        >
+                          ISBN: {"court.isbn"}
                         </Typography>
 
-                        <TruncatedTypography variant="body2" color="text.secondary">
-                          Summary: {Court.summary}
+                        <TruncatedTypography
+                          variant="body2"
+                          color="text.secondary"
+                        >
+                          Summary: {"Court.summary"}
                         </TruncatedTypography>
 
                         <Typography variant="body2" color="text.secondary">
-                          Position: {Court.position}
+                          Position: {"Court.position"}
                         </Typography>
                       </Stack>
                     </Card>
@@ -585,7 +629,7 @@ const CourtPage = () => {
                 ))}
             </Grid>
 
-            {/* <TablePagination
+            <TablePagination
               component="div"
               count={filteredCourts.length}
               page={page}
@@ -593,7 +637,7 @@ const CourtPage = () => {
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={handleChangeRowsPerPage}
               rowsPerPageOptions={[3, 6, 9]} // Pagination options
-            /> */}
+            />
           </>
         )}
 
@@ -615,28 +659,31 @@ const CourtPage = () => {
           handleUpdateCourt={updateCourt}
         />
 
-        <ImportCourtsModal isOpen={isImportModalOpen} onClose={handleCloseImportModal} />
+        <ImportCourtsModal
+          isOpen={isImportModalOpen}
+          onClose={handleCloseImportModal}
+        />
 
         <Popover
           open={Boolean(isMenuOpen)}
           anchorEl={isMenuOpen}
           onClose={handleCloseMenu}
-          anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          anchorOrigin={{ vertical: "top", horizontal: "left" }}
+          transformOrigin={{ vertical: "top", horizontal: "right" }}
           PaperProps={{
             sx: {
               p: 1,
               width: 140,
-              '& .MuiMenuItem-root': {
+              "& .MuiMenuItem-root": {
                 px: 1,
-                typography: 'body2',
+                typography: "body2",
                 borderRadius: 0.75,
               },
             },
           }}
         >
           <MenuItem
-            sx={{ color: 'success.main' }}
+            sx={{ color: "success.main" }}
             onClick={() => {
               setIsUpdateForm(true);
               getSelectedCourtDetails();
@@ -649,7 +696,7 @@ const CourtPage = () => {
           </MenuItem>
 
           <MenuItem
-            sx={{ color: 'error.main' }}
+            sx={{ color: "error.main" }}
             onClick={() => {
               handleOpenDialog();
               handleCloseMenu();
