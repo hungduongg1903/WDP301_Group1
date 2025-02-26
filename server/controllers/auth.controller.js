@@ -38,7 +38,6 @@ const register = async (req, res) => {
       verificationToken: verificationCode,
       verificationTokenExpireAt: verificationTokenExpireAt,
     });
-
     generateTokenAndSetCookie(res, user._id);
     await sendVerificationEmail(user.email, verificationCode);
 

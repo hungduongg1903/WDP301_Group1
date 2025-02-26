@@ -98,8 +98,6 @@ const CourtPage = () => {
     axios
       .get(apiUrl(routes.COURT, methods.GET_ALL))
       .then((response) => {
-        console.log("dcm");
-        console.log(response.data.courtsList);
         setCourts(response.data.courtsList);
         setFilteredCourts(response.data.courtsList);
         setIsTableLoading(false);
@@ -214,9 +212,6 @@ const CourtPage = () => {
 
   useEffect(() => {
     if (filterName.trim() === "" && filterIsAvailable === "") {
-
-      console.log("Courts")
-      console.log(Courts)
       setFilteredCourts(Courts);
     } else {
       let filteredResults = Courts;
@@ -275,8 +270,6 @@ const CourtPage = () => {
       {filteredCourts
         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
         .map((court) => {
-          console.log("Court dcm ");
-          console.log(court);
           const { _id, court_photo, court_name, status } = court;
 
           return (
@@ -299,11 +292,11 @@ const CourtPage = () => {
               </TableCell>
               {/* <TableCell>{position}</TableCell> */}
 
-              {/* <TableCell>
-                <Label color={status ? "active" : "error"} sx={{ padding: 2 }}>
-                  {status ? "active" : "Not available"}
+              <TableCell>
+                <Label color={court.status =="A" ? "success" : "error"} sx={{ padding: 2 }}>
+                  {court.status == "A" ? "active" : "Not available"}
                 </Label>
-              </TableCell> */}
+              </TableCell>
               {/* <TableCell>{formatDate(createdAt)}</TableCell> */}
               <TableCell align="right">
                 <IconButton
