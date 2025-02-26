@@ -23,7 +23,7 @@ export default function AccountPopover() {
       .post("http://localhost:8080/api/auth/logout", { withCredentials: true })
       .then((response) => {
         if (response.status === 200) {
-          console.log(response.data);
+          // console.log(response.data);
           logout();
         }
       })

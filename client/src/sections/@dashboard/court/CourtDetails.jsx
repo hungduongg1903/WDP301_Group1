@@ -34,16 +34,16 @@ const CourtDetails = () => {
       .get(apiUrl(routes.COURT, methods.GET, id), { withCredentials: true })
       .then((response) => {
         const courtData = response.data.court;
+        console.log("response.data")
         console.log(response.data)
         setCourt(courtData);
-        return Promise.all([
-          // axios.get(apiUrl(routes.AUTHOR, methods.GET, courtData.authorId), { withCredentials: true }),
-          // axios.get(apiUrl(routes.GENRE, methods.GET, courtData.genreId), { withCredentials: true }),
-        ]);
+        return courtData
       })
       .then((relatedCourtsResponse) => {
-        console.log(relatedCourtsResponse.data)
+        console.log("relatedCourtsResponse.data")
+        console.log(relatedCourtsResponse)
         const relatedCourts = relatedCourtsResponse.data.court.filter((b) => b._id !== id);
+        console.log(relatedCourts)
         const shuffledCourts = shuffle(relatedCourts).slice(0, 5);
         setRelatedCourts(shuffledCourts);
         setIsLoading(false);
@@ -67,7 +67,6 @@ const CourtDetails = () => {
       review,
       reviewedAt: new Date(),
     };
-    console.log(reviewData);
     axios
       .post(apiUrl(routes.REVIEW, methods.POST,id), reviewData)
       .then((response) => {
@@ -80,7 +79,6 @@ const CourtDetails = () => {
         toast.error('Failed to add review');
       });
   };
-  console.log(user?._id);
 
   if (isLoading) {
     return (

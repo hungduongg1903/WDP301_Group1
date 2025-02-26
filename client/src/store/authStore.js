@@ -97,8 +97,6 @@ export const useAuthStore = create((set) => ({
     set({ isCheckingAuth: true, error: null });
     try {
       const response = await axios.get(`${REACT_APP_API_URL}/check-auth`);
-      console.log(response.data);
-
       if (response.data.user) {
         set({
           user: response.data.user,
