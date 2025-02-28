@@ -3,6 +3,7 @@ const backendApiUrl = "http://localhost:8080/api";
 const routes = {
   AUTH: "auth",
   COURT: "court",
+  USER: "user"
 };
 
 const methods = {
