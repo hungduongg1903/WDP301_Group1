@@ -7,9 +7,9 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     name: { type: String, required: true },
     isAdmin: { type: Boolean, required: true, default: false },
-    photo_url: { type: String, required: false, nullable: true },
+    // photo_url: { type: String, required: false, nullable: true },
     dob: { type: Date, default: null },
-    isAdmin: { type: Boolean, default: false },
+  
     lastLoginDate: { type: Date, default: Date.now },
     isVerified: { type: Boolean, default: false },
     verificationToken: { type: String },
@@ -20,4 +20,6 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("User", userSchema);
+const User = mongoose.model('User', userSchema)
+
+module.exports = User;

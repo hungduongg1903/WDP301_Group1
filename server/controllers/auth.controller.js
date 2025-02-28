@@ -9,6 +9,7 @@ const {
   sendResetSuccessEmail,
 } = require("../mailtrap/email.js");
 const crypto = require("crypto");
+const { log } = require("console");
 
 const register = async (req, res) => {
   const { email, password, name, phone } = req.body;
@@ -28,7 +29,7 @@ const register = async (req, res) => {
     const hashedPassword = await bcryptjs.hash(password, 10);
     const verificationCode = generateVerificationCode();
     const verificationTokenExpireAt = Date.now() + 20 * 60 * 60 * 1000;
-
+    console.log(verificationCode)
     const user = await User.create({
       email,
       password: hashedPassword,

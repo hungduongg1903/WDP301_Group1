@@ -11,6 +11,7 @@ export default function Router() {
 
   const commonRoutes = [
     { path: "courts", element: <CourtPage /> },
+    {}
   ];
 
   const adminRoutes = useRoutes([

@@ -17,6 +17,7 @@ import DashboardAppPage from "./sections/@dashboard/app/DashboardAppPage";
 import CourtPage from "./sections/@dashboard/court/CourtPage";
 import LibraryApp from "./layouts/dashboard";
 import LandingPage from "./pages/LandingPage";
+import UserProfile from "./pages/UserProfile";
 
 // protect routes that require authentication
 const ProtectedRoute = ({ children }) => {
@@ -26,10 +27,10 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (user && !user.isVerified) {
-    // Check if user exists first
-    return <Navigate to="/verify-email" replace />;
-  }
+  // if (user && !user.isVerified) {
+  //   // Check if user exists first
+  //   return <Navigate to="/verify-email" replace />;
+  // }
 
   return children;
 };
@@ -62,6 +63,7 @@ function App() {
             <Route path="/signup" element={<SignUpPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            
 
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
@@ -135,6 +137,15 @@ function App() {
               }
             />
           </Route>
+          
+          <Route
+            path="/userprofile/:id"
+            element={
+              <RedirectAuthenticatedUser>
+                <UserProfile />
+              </RedirectAuthenticatedUser>
+            }
+          />
 
           {/* catch all routes */}
           <Route path="*" element={<Navigate to="/" replace />} />

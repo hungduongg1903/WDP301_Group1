@@ -33,7 +33,7 @@ const LandingPage = () => {
           <Link to={`/courts`} style={{ textDecoration: 'none', color: 'inherit' }}>  View More </Link>
         </CallToAction>
         <CallToAction>
-          {!user ? 
+          {user == null ? 
             <Link to={`/login`} style={{ textDecoration: 'none', color: 'inherit' }}>Login</Link> :
             <Link to={`/courts`} style={{ textDecoration: 'none', color: 'inherit' }}>Back</Link>
           }

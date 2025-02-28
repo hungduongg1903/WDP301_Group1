@@ -11,10 +11,11 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../../hooks/useAuth";
+// import { useAuth } from "../../../hooks/useAuth";
+import { useAuthStore } from "../../../store/authStore";
 
 export default function AccountPopover() {
-  const { user, logout } = useAuth(); // Destructure logout from useAuth()
+  const { user, logout } = useAuthStore(); // Destructure logout from useAuth()
   const [open, setOpen] = useState(null);
 
   const logoutUser = () => {
