@@ -49,17 +49,19 @@ const getAllMembers = async (req, res) => {
 const updateUser = async (req, res) => {
   const userId = req.params.id;
   const updatedData = req.body;
-
+  
+  
   try {
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    Object.assign(user, updatedData);
-    if (updatedData.password) {
-      user.setPassword(updatedData.password);
-    }
+    await Object.assign(user, updatedData);
+    console.log(Object.assign(user, updatedData));
+    // if (updatedData.password) {
+    //   user.setPassword(updatedData.password);
+    // }
     await user.save();
 
     return res.status(200).json({ success: true, user });
