@@ -4,5 +4,4 @@ const paymentController = require('./payment.controller');
 module.exports = {
     courtController,
     paymentController,
-    
 }
