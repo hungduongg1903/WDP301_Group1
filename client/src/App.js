@@ -15,6 +15,7 @@ import { useAuthStore } from "./store/authStore";
 import { useEffect } from "react";
 import DashboardAppPage from "./sections/@dashboard/app/DashboardAppPage";
 import CourtPage from "./sections/@dashboard/court/CourtPage";
+import CourtSchedule from "./sections/@dashboard/schedule/CourtSchedule";
 import LibraryApp from "./layouts/dashboard";
 import LandingPage from "./pages/LandingPage";
 import UserProfile from "./pages/UserProfile";
@@ -146,6 +147,24 @@ function App() {
               </RedirectAuthenticatedUser>
             }
           />
+
+          <Route
+            path="/courts/schedule/:id"
+            element={
+              <ProtectedRoute>
+                <LibraryApp />
+              </ProtectedRoute>
+            }
+          >
+            <Route
+              index
+              element={
+                <ProtectedRoute>
+                  <CourtSchedule />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
 
           {/* catch all routes */}
           <Route path="*" element={<Navigate to="/" replace />} />

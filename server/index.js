@@ -27,7 +27,8 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    // origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "https://pay.payos.vn"],
     credentials: true,
   })
 );
@@ -69,6 +70,7 @@ app.get("/", (req, res) => res.send("Welcome to Court Management System"));
 app.use("/api/court", routes.courtRouter);
 app.use("/api/auth", routes.authRouter);
 app.use("/api/user", routes.userRoutes);
+app.use("/api/payment", routes.paymentRouter);
 app.use("/api/feedback", routes.feedbackRoutes);
 
 app.listen(process.env.PORT, process.env.HOST_NAME, () => {

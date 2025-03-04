@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async';
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useParams, useNavigate, Link as RouterLink, Links } from 'react-router-dom';
 import { Container, Typography, Box, Button, CircularProgress, Grid, Avatar, TextField, Card, Breadcrumbs, Link } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import shuffle from 'lodash.shuffle';
@@ -169,17 +169,19 @@ const CourtDetails = () => {
             <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>Mở cửa: 6:00 sáng - 10:00 tối</Typography>
             <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>Tiện nghi: Cho thuê vợt và bóng, Nhà vệ sinh tại chỗ, Đài phun nước, Khu vực ngồi có mái che</Typography>
             <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>An toàn: Sân được bảo trì thường xuyên để đảm bảo an toàn cho người chơi</Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ mt: 2 }}
-              // onClick={(e) => {
-              //   setSelectedCourtId(court._id);
-              //   handleOpenBorrowalModal(e);
-              // }}
-            >
-              Đặt sân ngay
-            </Button>
+            <Link component={RouterLink} to={`/courts/schedule/${court._id}?courtName=${encodeURIComponent(court.court_name)}`}>
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{ mt: 2 }}
+                // onClick={(e) => {
+                //   setSelectedCourtId(court._id);
+                //   handleOpenBorrowalModal(e);
+                // }}
+              >
+                Đặt sân ngay
+              </Button>
+            </Link>
           </Box>
         </Grid>
       </Grid>
@@ -209,27 +211,7 @@ const CourtDetails = () => {
             </Button>
           </Grid>
         </Grid>
-        <Grid container spacing={2} sx={{ mt: 4 }}>
-          <Typography variant="h6" sx={{ mt: 2 }}>
-            Related Courts
-          </Typography>
-          {/* {relatedCourts.map((relatedCourt) => (
-            <Grid item xs={12} sm={2} key={relatedCourt._id} style={{ paddingLeft: '3rem' }}>
-              <Card>
-                <Box sx={{ position: 'relative' }}>
-                  <img alt={relatedCourt.name} src={relatedCourt.photoUrl} style={{ width: '100%', height: 'auto' }} />
-                  <Typography
-                    variant="subtitle2"
-                    sx={{ mt: 2, textAlign: 'center', cursor: 'pointer' }}
-                    onClick={() => navigate(/courts/${relatedCourt._id})}
-                  >
-                    {relatedCourt.name}
-                  </Typography>
-                </Box>
-              </Card>
-            </Grid>
-          ))} */}
-        </Grid>
+   
 
         {/* {user && (user.isAdmin || user.isLibrarian) ? (
           <BorrowalForm
