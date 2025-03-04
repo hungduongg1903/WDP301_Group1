@@ -3,7 +3,8 @@ const backendApiUrl = "http://localhost:8080/api";
 const routes = {
   AUTH: "auth",
   COURT: "court",
-  USER: "user"
+  USER: "user",
+  PAY: "payment",
 };
 
 const methods = {
@@ -15,6 +16,8 @@ const methods = {
   UPLOAD: "upload",
   IMPORT: "import",
   IMPORTBOOK: "importCourts",
+  CREATE_PAYMENT_LINK: "create-payment-link",
+
 };
 
 const apiUrl = (route, method, id = "") => `${backendApiUrl}/${route}/${method}${id && `/${id}`}`;
