@@ -1,14 +1,15 @@
 const mongoose = require("mongoose");
 const Court = require("./court.model");
 const User  = require("./user.model")
-
+const Feedback = require("./feedback.model")
 
 mongoose.Promise = global.Promise;
 
 const db = {};
 db.mongoose = mongoose;
 db.court = Court;
-db.User = User
+db.User = User;
+db.Feedback = Feedback
 
 
 db.connectDB = async () => {
