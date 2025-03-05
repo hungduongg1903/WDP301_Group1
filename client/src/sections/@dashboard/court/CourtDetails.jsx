@@ -11,23 +11,27 @@ import Label from '../../../components/label';
 import { useAuth } from '../../../hooks/useAuth';
 import ImageGallery from 'react-image-gallery';
 import 'react-image-gallery/styles/css/image-gallery.css';
+import {useAuthStore} from '../../../store/authStore'
 
 const TruncatedTypography = styled(Typography)({
   color: 'black',
 });
 
 const CourtDetails = () => {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
+  console.log(user);
+  
   
   const { id } = useParams();
   const navigate = useNavigate();
   const [court, setCourt] = useState(null);
-  const [reviews, setReviews] = useState([]);
-  const [relatedCourts, setRelatedCourts] = useState([]);
+  const [reviews, setReviews] = useState();
+  const [relatedCourts, setRelatedCourts] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [isBorrowalModalOpen, setIsBorrowalModalOpen] = useState(false);
   const [selectedCourtId, setSelectedCourtId] = useState(null);
   const [review, setReview] = useState('');
+  const [feedbacks, setFeedbacks] = useState([]);
   const getCourt = useCallback(() => {
     setIsLoading(true);
     axios
@@ -59,16 +63,38 @@ const CourtDetails = () => {
     getCourt();
   }, [getCourt]);
 
+  const getFeedbacks = useCallback(() => {
+    setIsLoading(true);
+    axios
+      .get(apiUrl(routes.FEEDBACK, methods.GET_BY_COURT_ID, id), { withCredentials: true })
+      .then((response) => {
+        console.log(response.data);
+        
+        setFeedbacks(response.data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching feedbacks:', error);
+        setIsLoading(false);
+      });
+  }, [id]);
+  
 
-  const addReview = () => {
+  useEffect(() => {
+    getFeedbacks();
+  }, [getFeedbacks]);
+ 
+  
+
+  const addReview = useCallback(() => {
     const reviewData = {
       court: id,
-      reviewedBy: user?._id,
+      user: user?._id,
       review,
       reviewedAt: new Date(),
     };
     axios
-      .post(apiUrl(routes.REVIEW, methods.POST,id), reviewData)
+      .post(apiUrl(routes.FEEDBACK, methods.POST,id), reviewData)
       .then((response) => {
         toast.success('Review added successfully');
         setReview('');
@@ -78,7 +104,7 @@ const CourtDetails = () => {
         console.error('Error adding review:', error);
         toast.error('Failed to add review');
       });
-  };
+  },);
 
   if (isLoading) {
     return (
@@ -169,7 +195,7 @@ const CourtDetails = () => {
             <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>Mở cửa: 6:00 sáng - 10:00 tối</Typography>
             <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>Tiện nghi: Cho thuê vợt và bóng, Nhà vệ sinh tại chỗ, Đài phun nước, Khu vực ngồi có mái che</Typography>
             <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>An toàn: Sân được bảo trì thường xuyên để đảm bảo an toàn cho người chơi</Typography>
-            <Link component={RouterLink} to={`/courts/schedule/${court._id}?courtName=${encodeURIComponent(court.court_name)}`}>
+            <Link component={RouterLink} to={`/courts/schedule/<span class="math-inline">\{court\.\_id\}?courtName\=</span>{encodeURIComponent(court.court_name)}`}>
               <Button
                 variant="contained"
                 color="primary"
@@ -211,31 +237,28 @@ const CourtDetails = () => {
             </Button>
           </Grid>
         </Grid>
-   
+      <Grid container spacing={2} sx={{ mt: 4 }}>
+        <Grid item xs={12}>
+          <Typography variant="h6" sx={{ mt: 2 }}>
+            Feedbacks
+          </Typography>
+          {feedbacks.map((feedback) => (
+            <Box key={court._id} sx={{ mt: 2, p: 2, border: '1px solid #ccc', borderRadius: '4px' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Avatar alt={feedback.user}  sx={{ mr: 2 }} />
+                <Typography variant="subtitle1" sx={{ color: '#888888' }}>
+                  {feedback.user}
+                </Typography>
+              </Box>
+              <Typography variant="body2" sx={{ mt: 1 }}>
+                {feedback.content}
+              </Typography>
+            </Box>
+          ))}
+        </Grid>
+      </Grid>
+    </Container>
+  );
+};
 
-        {/* {user && (user.isAdmin || user.isLibrarian) ? (
-          <BorrowalForm
-          isModalOpen={isBorrowalModalOpen}
-          handleCloseModal={handleCloseBorrowalModal}
-          id={selectedCourtId}
-          borrowal={borrowal}
-          setBorrowal={setBorrowal}
-          handleAddBorrowal={addBorrowal}
-          courtName = {court.name}
-          />
-        ) : (
-          <BorrowalFormForUser
-          isModalOpen={isBorrowalModalOpen}
-          handleCloseModal={handleCloseBorrowalModal}
-          id={selectedCourtId}
-          borrowal={borrowal}
-          setBorrowal={setBorrowal}
-          handleAddBorrowal={addBorrowal}
-          courtName = {court.name}
-          />
-        )} */}
-      </Container>
-    );
-  };
-
-  export default CourtDetails;
+export default CourtDetails;

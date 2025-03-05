@@ -5,6 +5,7 @@ const routes = {
   COURT: "court",
   USER: "user",
   PAY: "payment",
+  FEEDBACK: "feedback"
 };
 
 const methods = {
@@ -17,6 +18,7 @@ const methods = {
   IMPORT: "import",
   IMPORTBOOK: "importCourts",
   CREATE_PAYMENT_LINK: "create-payment-link",
+  GET_BY_COURT_ID: "getAll"
 
 };
 
