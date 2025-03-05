@@ -42,6 +42,8 @@ export const useAuthStore = create((set) => ({
         email,
         password,
       });
+      console.log(response.data.user);
+      
       set({
         isAuthenticated: true,
         user: response.data.user,
