@@ -170,17 +170,17 @@ const CourtDetails = () => {
             <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>Tiện nghi: Cho thuê vợt và bóng, Nhà vệ sinh tại chỗ, Đài phun nước, Khu vực ngồi có mái che</Typography>
             <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>An toàn: Sân được bảo trì thường xuyên để đảm bảo an toàn cho người chơi</Typography>
             <Link component={RouterLink} to={`/courts/schedule/${court._id}?courtName=${encodeURIComponent(court.court_name)}`}>
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ mt: 2 }}
-                // onClick={(e) => {
-                //   setSelectedCourtId(court._id);
-                //   handleOpenBorrowalModal(e);
-                // }}
-              >
-                Đặt sân ngay
-              </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ mt: 2 }}
+              // onClick={(e) => {
+              //   setSelectedCourtId(court._id);
+              //   handleOpenBorrowalModal(e);
+              // }}
+            >
+              Đặt sân ngay
+            </Button>
             </Link>
           </Box>
         </Grid>
@@ -211,7 +211,27 @@ const CourtDetails = () => {
             </Button>
           </Grid>
         </Grid>
-   
+        <Grid container spacing={2} sx={{ mt: 4 }}>
+          <Typography variant="h6" sx={{ mt: 2 }}>
+            Related Courts
+          </Typography>
+          {/* {relatedCourts.map((relatedCourt) => (
+            <Grid item xs={12} sm={2} key={relatedCourt._id} style={{ paddingLeft: '3rem' }}>
+              <Card>
+                <Box sx={{ position: 'relative' }}>
+                  <img alt={relatedCourt.name} src={relatedCourt.photoUrl} style={{ width: '100%', height: 'auto' }} />
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ mt: 2, textAlign: 'center', cursor: 'pointer' }}
+                    onClick={() => navigate(/courts/${relatedCourt._id})}
+                  >
+                    {relatedCourt.name}
+                  </Typography>
+                </Box>
+              </Card>
+            </Grid>
+          ))} */}
+        </Grid>
 
         {/* {user && (user.isAdmin || user.isLibrarian) ? (
           <BorrowalForm
