@@ -18,12 +18,13 @@ async function getReviewByCourtId(req, res, next) {
 
         // Thay đổi cách lấy dữ liệu feedback
         const listReview = await Feedback.find({ court: courtId }).populate("court", "court_name").populate("user", "name");
-
+        console.log(listReview)
         const listfromd = listReview.map(r => {
             return {
+                feedback_id: r.id,
                 content: r.content,
-                user: r.user.name,
-                court: r.court_name // Có thể bỏ thuộc tính này nếu không cần thiết
+                userName: r.user.name,
+                courtName: r.court.court_name // Có thể bỏ thuộc tính này nếu không cần thiết
             }
         })
         res.status(200).json(listfromd)
@@ -47,6 +48,7 @@ async function getAllReviews (req, res,next) {
 
 async function addReview (req, res,next) {
     try {       
+
         const courtId = req.params.id
 
         
@@ -59,8 +61,8 @@ async function addReview (req, res,next) {
             court: courtId,
             content: req.body.review
         });
-        await Feedback.create(newReview);
-        res.status(201).send({message: 'Feedback created successfully'});
+        const review = await Feedback.create(newReview);
+        res.status(201).send({message: 'Feedback created successfully', review});
     } catch (error) {
         next(error)
     }

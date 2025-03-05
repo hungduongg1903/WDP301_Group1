@@ -70,7 +70,6 @@ export default function UserProfile() {
   }, [getUser])
 
   const updateUser = () => {
-    console.log(user)
 
     axios
       .put(apiUrl(routes.USER, `${methods.PUT}/${id}`), user)
@@ -79,7 +78,6 @@ export default function UserProfile() {
         handleCloseModal()
         getUser()
         clearForm()
-        console.log(response)
       })
       .catch((error) => {
         console.log(error)

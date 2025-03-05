@@ -42,8 +42,6 @@ export default function AccountPopover() {
     setOpen(null);
   };
 
-  console.log("User object:", user);
-
   return (
     <>
       <IconButton
