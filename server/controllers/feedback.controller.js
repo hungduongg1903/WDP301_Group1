@@ -14,26 +14,23 @@ async function getReviewById(req, res,next) {
 async function getReviewByCourtId(req, res, next) {
     try {
         const courtId = req.params.bid
-        const listReview = []
         console.log(courtId);
-        const reviews = await Feedback.find().populate("court", "court_name").populate("user","name");
-        const review = reviews.map(r => {
-            if (r.court._id == courtId)
-              listReview.push(r)
-        })
+
+        // Thay đổi cách lấy dữ liệu feedback
+        const listReview = await Feedback.find({ court: courtId }).populate("court", "court_name").populate("user", "name");
+
         const listfromd = listReview.map(r => {
             return {
-                
                 content: r.content,
                 user: r.user.name,
-                court: r.court_name
+                court: r.court_name // Có thể bỏ thuộc tính này nếu không cần thiết
             }
         })
         res.status(200).json(listfromd)
-     
+
     } catch (error) {
         console.error("Error fetching reviews:", error);
-        next(error); 
+        next(error);
     }
 }
 
@@ -51,16 +48,16 @@ async function getAllReviews (req, res,next) {
 async function addReview (req, res,next) {
     try {       
         const courtId = req.params.id
+
+        
         const userId = req.body.user
         if (!userId) return res.status(401).send('Unauthorized');
-        const existingReview = await Feedback.findOne({ user: userId, court: req.params.id });
-        console.log(existingReview);
-        if (existingReview) return res.status(400).send({ message: 'User already submitted a feedback for this court' });
+        
         
         const newReview = new Feedback({
             user: req.body.user,
             court: courtId,
-            content: req.body.content
+            content: req.body.review
         });
         await Feedback.create(newReview);
         res.status(201).send({message: 'Feedback created successfully'});

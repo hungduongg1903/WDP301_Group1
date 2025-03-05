@@ -139,9 +139,9 @@ const CourtPage = () => {
       });
   };
 
-  const deleteCourt = (CourtId) => {
+  const deleteCourt = () => {
     axios
-      .delete(apiUrl(routes.COURT, methods.DELETE, CourtId))
+      .delete(apiUrl(routes.COURT, methods.DELETE, selectedCourtId))
       .then((response) => {
         toast.success("Court deleted successfully");
         handleCloseDialog();
@@ -211,14 +211,22 @@ const CourtPage = () => {
   }, []);
 
   useEffect(() => {
-    if (filterName.trim() === "" && filterIsAvailable === "") {
-      setFilteredCourts(Courts);
-    } else {
-      let filteredResults = Courts;
+    let filteredResults = Courts;
 
-      setFilteredCourts(filteredResults);
+    if (filterName.trim() !== "") {
+      filteredResults = filteredResults.filter((court) =>
+        court.court_name.toLowerCase().includes(filterName.toLowerCase())
+      );
     }
-  }, [filterName, Courts]);
+
+    if (filterIsAvailable !== "") {
+      filteredResults = filteredResults.filter(
+        (court) => court.status === (filterIsAvailable === "true" ? "A" : "B")
+      );
+    }
+
+    setFilteredCourts(filteredResults);
+  }, [filterName, filterIsAvailable, Courts]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
