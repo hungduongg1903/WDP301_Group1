@@ -8,7 +8,6 @@ import { styled } from '@mui/material/styles';
 import shuffle from 'lodash.shuffle';
 import { apiUrl, routes, methods } from '../../../constants';
 import Label from '../../../components/label';
-import { useAuth } from '../../../hooks/useAuth';
 import ImageGallery from 'react-image-gallery';
 import 'react-image-gallery/styles/css/image-gallery.css';
 import {useAuthStore} from '../../../store/authStore'
@@ -19,37 +18,26 @@ const TruncatedTypography = styled(Typography)({
 
 const CourtDetails = () => {
   const { user } = useAuthStore();
-  console.log(user);
+  // console.log(user);
   
   
   const { id } = useParams();
   const navigate = useNavigate();
   const [court, setCourt] = useState(null);
-  const [reviews, setReviews] = useState();
+  const [reviews, setReviews] = useState([]);
   const [relatedCourts, setRelatedCourts] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [isBorrowalModalOpen, setIsBorrowalModalOpen] = useState(false);
   const [selectedCourtId, setSelectedCourtId] = useState(null);
   const [review, setReview] = useState('');
-  const [feedbacks, setFeedbacks] = useState([]);
+  // const [feedbacks, setFeedbacks] = useState([]);
   const getCourt = useCallback(() => {
     setIsLoading(true);
     axios
       .get(apiUrl(routes.COURT, methods.GET, id), { withCredentials: true })
       .then((response) => {
         const courtData = response.data.court;
-        console.log("response.data")
-        console.log(response.data)
         setCourt(courtData);
-        return courtData
-      })
-      .then((relatedCourtsResponse) => {
-        console.log("relatedCourtsResponse.data")
-        console.log(relatedCourtsResponse)
-        const relatedCourts = relatedCourtsResponse.data.court.filter((b) => b._id !== id);
-        console.log(relatedCourts)
-        const shuffledCourts = shuffle(relatedCourts).slice(0, 5);
-        setRelatedCourts(shuffledCourts);
         setIsLoading(false);
       })
       .catch((error) => {
@@ -57,6 +45,20 @@ const CourtDetails = () => {
         // toast.error('Failed to fetch court details');
         setIsLoading(false);
       });
+      // .then((relatedCourtsResponse) => {
+      //   console.log("relatedCourtsResponse.data")
+      //   console.log(relatedCourtsResponse)
+      //   const relatedCourts = relatedCourtsResponse.data.court.filter((b) => b._id !== id);
+      //   console.log(relatedCourts)
+      //   const shuffledCourts = shuffle(relatedCourts).slice(0, 5);
+      //   setRelatedCourts(shuffledCourts);
+      //   setIsLoading(false);
+      // })
+      // .catch((error) => {
+      //   console.error('Error fetching court details:', error);
+      //   // toast.error('Failed to fetch court details');
+      //   setIsLoading(false);
+      // });
   }, [id]);
 
   useEffect(() => {
@@ -68,9 +70,9 @@ const CourtDetails = () => {
     axios
       .get(apiUrl(routes.FEEDBACK, methods.GET_BY_COURT_ID, id), { withCredentials: true })
       .then((response) => {
-        console.log(response.data);
-        
-        setFeedbacks(response.data);
+        console.log(response.data)
+        setReviews(response.data);
+        console.log(reviews)
         setIsLoading(false);
       })
       .catch((error) => {
@@ -96,9 +98,12 @@ const CourtDetails = () => {
     axios
       .post(apiUrl(routes.FEEDBACK, methods.POST,id), reviewData)
       .then((response) => {
-        toast.success('Review added successfully');
+        const review = {...response.data.review, feedback_id: response.data.review._id}
+        console.log(review)
+
         setReview('');
-        setReviews([...reviews, response.data.review]);
+        setReviews([...reviews, review]);
+        toast.success('Review added successfully');
       })
       .catch((error) => {
         console.error('Error adding review:', error);
@@ -195,18 +200,20 @@ const CourtDetails = () => {
             <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>Mở cửa: 6:00 sáng - 10:00 tối</Typography>
             <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>Tiện nghi: Cho thuê vợt và bóng, Nhà vệ sinh tại chỗ, Đài phun nước, Khu vực ngồi có mái che</Typography>
             <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>An toàn: Sân được bảo trì thường xuyên để đảm bảo an toàn cho người chơi</Typography>
-            <Link component={RouterLink} to={`/courts/schedule/<span class="math-inline">\{court\.\_id\}?courtName\=</span>{encodeURIComponent(court.court_name)}`}>
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ mt: 2 }}
-                // onClick={(e) => {
-                //   setSelectedCourtId(court._id);
-                //   handleOpenBorrowalModal(e);
-                // }}
-              >
-                Đặt sân ngay
-              </Button>
+
+            <Link component={RouterLink} to={`/courts/schedule/${court._id}?courtName=${encodeURIComponent(court.court_name)}`}>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ mt: 2 }}
+              // onClick={(e) => {
+              //   setSelectedCourtId(court._id);
+              //   handleOpenBorrowalModal(e);
+              // }}
+            >
+              Đặt sân ngay
+            </Button>
+
             </Link>
           </Box>
         </Grid>
@@ -237,21 +244,22 @@ const CourtDetails = () => {
             </Button>
           </Grid>
         </Grid>
+
       <Grid container spacing={2} sx={{ mt: 4 }}>
         <Grid item xs={12}>
           <Typography variant="h6" sx={{ mt: 2 }}>
             Feedbacks
           </Typography>
-          {feedbacks.map((feedback) => (
-            <Box key={court._id} sx={{ mt: 2, p: 2, border: '1px solid #ccc', borderRadius: '4px' }}>
+          {reviews.map((review) => (
+            <Box key={review.feedback_id} sx={{ mt: 2, p: 2, border: '1px solid #ccc', borderRadius: '4px' }}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar alt={feedback.user}  sx={{ mr: 2 }} />
+                <Avatar alt={review.userName}  sx={{ mr: 2 }} />
                 <Typography variant="subtitle1" sx={{ color: '#888888' }}>
-                  {feedback.user}
+                  {review.userName}
                 </Typography>
               </Box>
               <Typography variant="body2" sx={{ mt: 1 }}>
-                {feedback.content}
+                {review.content}
               </Typography>
             </Box>
           ))}

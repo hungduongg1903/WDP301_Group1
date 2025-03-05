@@ -15,7 +15,6 @@ const LandingPage = () => {
   
   const { user } = useAuthStore()
   
-  console.log(user)
 
   return (
     <Hero

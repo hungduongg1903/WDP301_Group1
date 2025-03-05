@@ -33,7 +33,6 @@ Nav.propTypes = {
 
 export default function Nav({ openNav, onCloseNav }) {
   const { user } = useAuthStore();
-  console.log(user)
 
   const [open, setOpen] = useState(null);
   const { pathname } = useLocation();
