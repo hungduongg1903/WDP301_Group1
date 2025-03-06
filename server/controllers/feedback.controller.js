@@ -24,6 +24,7 @@ async function getReviewByCourtId(req, res, next) {
                 feedback_id: r.id,
                 content: r.content,
                 userName: r.user.name,
+                userId: r.user._id, 
                 courtName: r.court.court_name // Có thể bỏ thuộc tính này nếu không cần thiết
             }
         })
@@ -68,16 +69,41 @@ async function addReview (req, res,next) {
     }
 }
 
-async function updateReview (req, res,next){
-try {
-    const reviewId = req.params.id
-    const updatedReview = req.body
-    const newReview = await Feedback.findByIdAndUpdate(reviewId,updatedReview)
-    res.status(200).send(await Feedback.findById(newReview.id))
-} catch (error) {
-    next(error)
-}
-}
+async function updateReview(req, res, next) {
+    try {
+      const reviewId = req.params.id;
+      const { content } = req.body; // Chỉ lấy nội dung để cập nhật
+      
+      // Tìm review trước để kiểm tra quyền (nếu cần)
+      const existingReview = await Feedback.findById(reviewId);
+      if (!existingReview) {
+        return res.status(404).json({ message: 'Không tìm thấy đánh giá' });
+      }
+      
+      // Cập nhật nội dung review
+      existingReview.content = content;
+      await existingReview.save();
+      
+      // Lấy review đã cập nhật với thông tin đầy đủ
+      const updatedReview = await Feedback.findById(reviewId)
+        .populate("user", "name")
+        .populate("court", "court_name");
+      
+      res.status(200).json({ 
+        message: 'Cập nhật đánh giá thành công', 
+        review: {
+          feedback_id: updatedReview._id,
+          content: updatedReview.content,
+          userName: updatedReview.user.name,
+          userId: updatedReview.user._id,
+          courtName: updatedReview.court.court_name
+        }
+      });
+    } catch (error) {
+      console.error("Error updating review:", error);
+      next(error);
+    }
+  }
 
 async function deleteReview(req, res, next){
   try {
