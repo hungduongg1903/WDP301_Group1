@@ -2,15 +2,22 @@ import { Helmet } from 'react-helmet-async';
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { useParams, useNavigate, Link as RouterLink, Links } from 'react-router-dom';
-import { Container, Typography, Box, Button, CircularProgress, Grid, Avatar, TextField, Card, Breadcrumbs, Link } from '@mui/material';
+import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
+import { 
+  Container, Typography, Box, Button, CircularProgress, Grid, Avatar, 
+  TextField, Breadcrumbs, Link, IconButton, Dialog, DialogActions, 
+  DialogContent, DialogContentText, DialogTitle 
+} from '@mui/material';
 import { styled } from '@mui/material/styles';
 import shuffle from 'lodash.shuffle';
 import { apiUrl, routes, methods } from '../../../constants';
 import Label from '../../../components/label';
 import ImageGallery from 'react-image-gallery';
 import 'react-image-gallery/styles/css/image-gallery.css';
-import {useAuthStore} from '../../../store/authStore'
+import { useAuthStore } from '../../../store/authStore';
+// Import icons for edit and delete actions
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const TruncatedTypography = styled(Typography)({
   color: 'black',
@@ -18,8 +25,6 @@ const TruncatedTypography = styled(Typography)({
 
 const CourtDetails = () => {
   const { user } = useAuthStore();
-  // console.log(user);
-  
   
   const { id } = useParams();
   const navigate = useNavigate();
@@ -30,7 +35,16 @@ const CourtDetails = () => {
   const [isBorrowalModalOpen, setIsBorrowalModalOpen] = useState(false);
   const [selectedCourtId, setSelectedCourtId] = useState(null);
   const [review, setReview] = useState('');
-  // const [feedbacks, setFeedbacks] = useState([]);
+  
+  // State for edit functionality
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingReviewId, setEditingReviewId] = useState(null);
+  const [editingReviewContent, setEditingReviewContent] = useState('');
+  
+  // State for delete confirmation dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteReviewId, setDeleteReviewId] = useState(null);
+
   const getCourt = useCallback(() => {
     setIsLoading(true);
     axios
@@ -42,23 +56,8 @@ const CourtDetails = () => {
       })
       .catch((error) => {
         console.error('Error fetching court details:', error);
-        // toast.error('Failed to fetch court details');
         setIsLoading(false);
       });
-      // .then((relatedCourtsResponse) => {
-      //   console.log("relatedCourtsResponse.data")
-      //   console.log(relatedCourtsResponse)
-      //   const relatedCourts = relatedCourtsResponse.data.court.filter((b) => b._id !== id);
-      //   console.log(relatedCourts)
-      //   const shuffledCourts = shuffle(relatedCourts).slice(0, 5);
-      //   setRelatedCourts(shuffledCourts);
-      //   setIsLoading(false);
-      // })
-      // .catch((error) => {
-      //   console.error('Error fetching court details:', error);
-      //   // toast.error('Failed to fetch court details');
-      //   setIsLoading(false);
-      // });
   }, [id]);
 
   useEffect(() => {
@@ -70,9 +69,15 @@ const CourtDetails = () => {
     axios
       .get(apiUrl(routes.FEEDBACK, methods.GET_BY_COURT_ID, id), { withCredentials: true })
       .then((response) => {
-        console.log(response.data)
-        setReviews(response.data);
-        console.log(reviews)
+        console.log('Fetched reviews:', response.data);
+        // Map userId from user._id if not present
+        const reviewsWithUserIds = response.data.map(review => {
+          if (!review.userId && review.user && review.user._id) {
+            return { ...review, userId: review.user._id };
+          }
+          return review;
+        });
+        setReviews(reviewsWithUserIds);
         setIsLoading(false);
       })
       .catch((error) => {
@@ -81,14 +86,16 @@ const CourtDetails = () => {
       });
   }, [id]);
   
-
   useEffect(() => {
     getFeedbacks();
   }, [getFeedbacks]);
  
-  
-
   const addReview = useCallback(() => {
+    if (!review.trim()) {
+      toast.error('Vui lòng nhập nội dung đánh giá');
+      return;
+    }
+    
     const reviewData = {
       court: id,
       user: user?._id,
@@ -96,20 +103,148 @@ const CourtDetails = () => {
       reviewedAt: new Date(),
     };
     axios
-      .post(apiUrl(routes.FEEDBACK, methods.POST,id), reviewData)
+      .post(apiUrl(routes.FEEDBACK, methods.POST, id), reviewData)
       .then((response) => {
-        const review = {...response.data.review, feedback_id: response.data.review._id}
-        console.log(review)
-
+        // Ensure we have the correct structure with userId
+        const newReview = {
+          feedback_id: response.data.review._id,
+          content: response.data.review.content,
+          userName: user?.name,
+          userId: user?._id,
+        };
         setReview('');
-        setReviews([...reviews, review]);
-        toast.success('Review added successfully');
+        setReviews([...reviews, newReview]);
+        toast.success('Đã thêm đánh giá thành công');
       })
       .catch((error) => {
         console.error('Error adding review:', error);
-        toast.error('Failed to add review');
+        toast.error('Không thể thêm đánh giá');
       });
-  },);
+  }, [id, review, reviews, user]);
+
+  // Handle edit review
+  const handleEditReview = (reviewId, currentContent) => {
+    setIsEditing(true);
+    setEditingReviewId(reviewId);
+    setEditingReviewContent(currentContent);
+  };
+
+  // Submit edited review
+  const submitEditedReview = () => {
+    if (!editingReviewContent.trim()) {
+      toast.error('Vui lòng nhập nội dung đánh giá');
+      return;
+    }
+
+    // Log the API URL for debugging
+    const updateUrl = apiUrl(routes.FEEDBACK, methods.PUT, editingReviewId);
+    console.log('Update API URL:', updateUrl);
+
+    // Prepare the data to update
+    const updateData = { 
+      content: editingReviewContent
+    };
+    
+    // Make the API request
+    axios
+      .put(updateUrl, updateData, { withCredentials: true })
+      .then((response) => {
+        console.log('Update response:', response.data);
+        
+        // Update the reviews state with the edited content
+        const updatedReviews = reviews.map(review => 
+          review.feedback_id === editingReviewId 
+            ? { ...review, content: editingReviewContent } 
+            : review
+        );
+        setReviews(updatedReviews);
+        
+        // Reset edit state
+        setIsEditing(false);
+        setEditingReviewId(null);
+        setEditingReviewContent('');
+        
+        toast.success('Đã cập nhật đánh giá thành công');
+      })
+      .catch((error) => {
+        console.error('Error updating review:', error);
+        
+        // Provide more specific error messages based on the error
+        if (error.response) {
+          console.error('Response data:', error.response.data);
+          console.error('Response status:', error.response.status);
+          
+          if (error.response.status === 404) {
+            toast.error('Không tìm thấy đường dẫn API cập nhật (404)');
+          } else {
+            toast.error(`Lỗi từ server: ${error.response.status}`);
+          }
+        } else if (error.request) {
+          toast.error('Không nhận được phản hồi từ server');
+        } else {
+          toast.error('Lỗi khi gửi yêu cầu: ' + error.message);
+        }
+      });
+  };
+
+  // Cancel editing
+  const cancelEditing = () => {
+    setIsEditing(false);
+    setEditingReviewId(null);
+    setEditingReviewContent('');
+  };
+
+  // Open delete confirmation dialog
+  const openDeleteDialog = (reviewId) => {
+    setDeleteReviewId(reviewId);
+    setDeleteDialogOpen(true);
+  };
+
+  // Close delete confirmation dialog
+  const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setDeleteReviewId(null);
+  };
+
+  // Delete review
+  const deleteReview = () => {
+    const deleteUrl = apiUrl(routes.FEEDBACK, methods.DELETE, deleteReviewId);
+    console.log('Delete API URL:', deleteUrl);
+    
+    axios
+      .delete(deleteUrl, { withCredentials: true })
+      .then((response) => {
+        console.log('Delete response:', response);
+        
+        // Remove the deleted review from state
+        const filteredReviews = reviews.filter(review => review.feedback_id !== deleteReviewId);
+        setReviews(filteredReviews);
+        
+        closeDeleteDialog();
+        toast.success('Đã xóa đánh giá thành công');
+      })
+      .catch((error) => {
+        console.error('Error deleting review:', error);
+        
+        // Provide more specific error messages
+        if (error.response) {
+          console.error('Response data:', error.response.data);
+          console.error('Response status:', error.response.status);
+          
+          if (error.response.status === 404) {
+            toast.error('Không tìm thấy đường dẫn API xóa (404)');
+          } else {
+            toast.error(`Lỗi từ server: ${error.response.status}`);
+          }
+        } else if (error.request) {
+          toast.error('Không nhận được phản hồi từ server');
+        } else {
+          toast.error('Lỗi khi gửi yêu cầu: ' + error.message);
+        }
+        
+        closeDeleteDialog();
+      });
+  };
 
   if (isLoading) {
     return (
@@ -136,10 +271,6 @@ const CourtDetails = () => {
       original: court.court_photo,
       thumbnail: court.court_photo,
     },
-    // ...court.pageUrls.map((url) => ({
-    //   original: url,
-    //   thumbnail: url,
-    // })),
   ];
 
   const backToCourtPage = () => {
@@ -154,7 +285,22 @@ const CourtDetails = () => {
     setIsBorrowalModalOpen(false);
   };
 
+  // Check if a review belongs to the current user
+  const isUserReview = (reviewUserId) => {
+    return user && user._id === reviewUserId;
+  };
   
+  // Debug function to check review data
+  const debugReview = (review) => {
+    console.log('Review data:', {
+      id: review.feedback_id,
+      content: review.content,
+      userName: review.userName,
+      userId: review.userId
+    });
+    console.log('Current user ID:', user?._id);
+    console.log('Can edit?', review.userId === user?._id);
+  };
 
   return (
     <Container>
@@ -169,9 +315,6 @@ const CourtDetails = () => {
         <Link component={RouterLink} to="/courts">
           Courts
         </Link>
-        {/* <Link component={RouterLink} to={`/genre/${genre._id}`}>
-          {genre.name}
-        </Link> */}
         <Typography color="text.primary">{court.court_name}</Typography>
       </Breadcrumbs>
 
@@ -180,16 +323,12 @@ const CourtDetails = () => {
       </Button>
 
       <Grid container spacing={2}>
-      <Grid item xs={12} sm={4}>
+        <Grid item xs={12} sm={4}>
           <ImageGallery items={images} />
         </Grid>
         <Grid item xs={12} sm={8} style={{ paddingLeft: '3rem' }}>
           <Box>
             <Typography variant="h3">{court.court_name}</Typography>
-            {/* <Label color={court.isAvailable ? 'success' : 'error'} sx={{ mt: 1, mb: 2 }}>
-              {court.isAvailable ? 'Available' : 'Not available'}
-            </Label> */}
-          
             
             <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>
               {court.court_name}
@@ -202,22 +341,18 @@ const CourtDetails = () => {
             <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>An toàn: Sân được bảo trì thường xuyên để đảm bảo an toàn cho người chơi</Typography>
 
             <Link component={RouterLink} to={`/courts/schedule/${court._id}?courtName=${encodeURIComponent(court.court_name)}`}>
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ mt: 2 }}
-              // onClick={(e) => {
-              //   setSelectedCourtId(court._id);
-              //   handleOpenBorrowalModal(e);
-              // }}
-            >
-              Đặt sân ngay
-            </Button>
-
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{ mt: 2 }}
+              >
+                Đặt sân ngay
+              </Button>
             </Link>
           </Box>
         </Grid>
       </Grid>
+      
       <Grid container spacing={2} sx={{ mt: 4 }}>
         <Typography variant="h6" sx={{ mt: 2 }}>
           Write a Review
@@ -238,12 +373,12 @@ const CourtDetails = () => {
             value={review}
             onChange={(e) => setReview(e.target.value)}
             sx={{ mt: 2 }}
-            />
-            <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={addReview}>
-              Submit Review
-            </Button>
-          </Grid>
+          />
+          <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={addReview}>
+            Submit Review
+          </Button>
         </Grid>
+      </Grid>
 
       <Grid container spacing={2} sx={{ mt: 4 }}>
         <Grid item xs={12}>
@@ -252,19 +387,92 @@ const CourtDetails = () => {
           </Typography>
           {reviews.map((review) => (
             <Box key={review.feedback_id} sx={{ mt: 2, p: 2, border: '1px solid #ccc', borderRadius: '4px' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar alt={review.userName}  sx={{ mr: 2 }} />
-                <Typography variant="subtitle1" sx={{ color: '#888888' }}>
-                  {review.userName}
-                </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Avatar alt={review.userName} sx={{ mr: 2 }} />
+                  <Typography variant="subtitle1" sx={{ color: '#888888' }}>
+                    {review.userName}
+                  </Typography>
+                </Box>
+                
+                {user && user._id === review.userId && (
+                  <Box>
+                    <IconButton 
+                      size="small" 
+                      color="primary" 
+                      onClick={() => {
+                        console.log('Editing review:', review.feedback_id);
+                        handleEditReview(review.feedback_id, review.content);
+                      }}
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton 
+                      size="small" 
+                      color="error" 
+                      onClick={() => {
+                        console.log('Attempting to delete review:', review.feedback_id);
+                        openDeleteDialog(review.feedback_id);
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                )}
               </Box>
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                {review.content}
-              </Typography>
+              
+              {isEditing && editingReviewId === review.feedback_id ? (
+                <Box sx={{ mt: 1 }}>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={2}
+                    value={editingReviewContent}
+                    onChange={(e) => setEditingReviewContent(e.target.value)}
+                    variant="outlined"
+                    size="small"
+                  />
+                  <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button size="small" onClick={cancelEditing} sx={{ mr: 1 }}>
+                      Hủy
+                    </Button>
+                    <Button size="small" variant="contained" color="primary" onClick={submitEditedReview}>
+                      Lưu
+                    </Button>
+                  </Box>
+                </Box>
+              ) : (
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  {review.content}
+                </Typography>
+              )}
             </Box>
           ))}
         </Grid>
       </Grid>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={closeDeleteDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Xác nhận xóa đánh giá"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Bạn có chắc chắn muốn xóa đánh giá này không? Hành động này không thể hoàn tác.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeDeleteDialog}>Hủy</Button>
+          <Button onClick={deleteReview} color="error" autoFocus>
+            Xóa
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
