@@ -69,7 +69,7 @@ const CourtPage = () => {
   const [Court, setCourt] = useState({
     id: "",
     court_name: "",
-    isbn: "",
+    price: "",
     // isAvailable: true,
     court_photo: "",
     status: "",
@@ -90,7 +90,7 @@ const CourtPage = () => {
 
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(6);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("name");
 
@@ -165,7 +165,8 @@ const CourtPage = () => {
     setCourt({
       id: "",
       court_name: "",
-      isbn: "",
+      price: "",
+      // isbn: "",
       // isAvailable: true,
       court_photo: "",
       status: "",
