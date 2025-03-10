@@ -3,6 +3,7 @@ const courtRouter = require("./court.router.js");
 const userRoutes = require("./user.router.js")
 const feedbackRoutes = require("./feedback.router.js")
 const paymentRouter = require("./payment.router");
+const billRouter = require("./bill.router");
 
 module.exports = { 
     authRouter,
@@ -10,4 +11,6 @@ module.exports = {
     userRoutes,
     paymentRouter,
     feedbackRoutes,
+    billRouter,
+
 };

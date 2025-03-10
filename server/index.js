@@ -71,6 +71,7 @@ app.use("/api/auth", routes.authRouter);
 app.use("/api/user", routes.userRoutes);
 app.use("/api/payment", routes.paymentRouter);
 app.use("/api/feedback", routes.feedbackRoutes);
+app.use("/api/bill", routes.billRouter);
 
 app.listen(process.env.PORT, process.env.HOST_NAME, () => {
   console.log("Server listening on port " + process.env.PORT);

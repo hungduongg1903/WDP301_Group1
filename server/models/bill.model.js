@@ -1,15 +1,60 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose")
 
-const billSchema = new mongoose.Schema(
-  {
-    rental_price: { type: Number, required: true },
-    time_rental: { type: Date, required: true },
-    qr_code: { type: String, required: true },
-    status: { type: String, enum: ["pending", "paid", "cancelled"], default: "pending" },
-    court: { type: mongoose.Schema.Types.ObjectId, ref: "Court", required: true },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+const billSchema = new mongoose.Schema({
+  retal_price: {
+    type: Number,
+    required: true
   },
-  { timestamps: true }
-);
+  time_rental: {
+    type: String,
+    required: false
+  },
+  end_time_rental: {
+    type: String,
+    required: false
+  },
+  court_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Court',
+    required: false
+  },
+  user_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false
+  },
+  counter_account_name: {
+    type: String,
+    required: true
+  },
+  counter_account_number: {
+    type: String,
+    required: true
+  },
+  order_code_pay_os: {
+    type: Number,
+    required: true,
+    unique:true,
+  },
+  status: {
+    type: String,
+    required: true,
+  },
+  transaction_bank_time: {
+    type: String,
+    required: false,
+  },
+  reference_bank: {
+    type: String,
+    required: false,
+    unique:true
+  },
 
-export default mongoose.model("Bill", billSchema);
+},{
+  timestamps : true
+})
+
+
+const Bill = mongoose.model('Bill', billSchema)
+
+module.exports = Bill;
