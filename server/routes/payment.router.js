@@ -5,7 +5,7 @@ const { paymentController } = require("../controllers/index");
 
 router.post("/create-payment-link", paymentController.createPayment)   
 
-
+router.post("/receive-hook", paymentController.webHook)
 
 
 module.exports = router;

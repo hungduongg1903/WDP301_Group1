@@ -5,12 +5,16 @@ const routes = {
   COURT: "court",
   USER: "user",
   PAY: "payment",
-  FEEDBACK: "feedback"
+  FEEDBACK: "feedback",
+  BILL: "bill",
+
 };
 
 const methods = {
   GET: "get",
   GET_ALL: "getAll",
+  GET_ALL_BY_DATE: "getAll/date",
+  PUT_BY: "update/by",
   POST: "add",
   PUT: "update",
   DELETE: "delete",
