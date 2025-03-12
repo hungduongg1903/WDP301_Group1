@@ -108,19 +108,40 @@ const CourtPage = () => {
       });
   };
 
-  const addCourt = () => {
-    axios
-      .post(apiUrl(routes.COURT, methods.POST), Court)
-      .then((response) => {
-        toast.success("Court added successfully");
-        handleCloseModal();
-        getAllCourts();
-        clearForm();
-      })
-      .catch((error) => {
-        console.error("Error adding Court:", error);
-        toast.error("Failed to add Court");
-      });
+  const addCourt = async () => {
+    // Validate required fields
+    if (!Court.court_name || !Court.price || !Court.court_photo) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+  
+    // Transform the payload to match backend field names
+    const payload = {
+      courtName: Court.court_name,
+      price: parseFloat(Court.price), // Convert price to a number
+      photoUrl: Court.court_photo,
+      status: Court.status === "A" ? "A" : "B", // Map status to backend values
+    };
+  
+    console.log("Sending payload:", payload);
+  
+    try {
+      // Optional: Set loading state if needed
+      // setIsModalLoading(true);
+  
+      const response = await axios.post(apiUrl(routes.COURT, methods.POST), payload);
+      toast.success("Court added successfully");
+      handleCloseModal();
+      getAllCourts();
+      clearForm();
+    } catch (error) {
+      console.error("Error adding Court:", error.response?.data || error.message);
+      const errorMessage = error.response?.data?.message || "Failed to add Court";
+      toast.error(errorMessage);
+    } finally {
+      // Optional: Reset loading state
+      // setIsModalLoading(false);
+    }
   };
 
   const updateCourt = () => {

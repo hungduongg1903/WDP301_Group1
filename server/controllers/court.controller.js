@@ -77,7 +77,7 @@ const addCourt = async (req, res, next) => {
     const newCourtData = {
       court_name : req.body.courtName,
       price: req.body.price,
-      courts_photo: req.body.photoUrl,
+      court_photo: req.body.photoUrl,
       // pageUrls: req.body.pageUrls || [],
       status: req.body.status || "active",
     };
