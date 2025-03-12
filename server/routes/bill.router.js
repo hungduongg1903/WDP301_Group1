@@ -8,7 +8,7 @@ router.get("/getAll", billController.getAllBills)
 
 router.get("/getAll/:courtId", billController.getAllBillsByCourtId)   
 
-router.get("/getAll/date/:courtId", billController.getAllBillsByCourtIdAndDate)   
+router.get("/getAll/date/:courtId", billController.getAllBillsByCourtIdAndCurrentDate)   
 
 router.get("/get/:id", billController.getBill)
 

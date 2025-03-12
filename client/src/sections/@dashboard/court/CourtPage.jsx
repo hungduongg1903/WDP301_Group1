@@ -90,7 +90,7 @@ const CourtPage = () => {
 
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(6);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("name");
 
