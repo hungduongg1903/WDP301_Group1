@@ -9,7 +9,7 @@ const courtSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  courts_photo: {
+  court_photo: {
     type: String,
     required: true
   },
