@@ -1,7 +1,7 @@
 // import { ScheduleMeeting } from 'react-schedule-meeting';
 import { useEffect, useState, useCallback } from 'react';
 import CalendarWeek from 'rt-event-calendar';
-import { format, addDays, subDays, isBefore, addWeeks, subWeeks, parse, set, getMonth, addHours } from 'date-fns';
+import { format, addDays, subDays, isBefore, addWeeks, subWeeks, parse, set, getMonth, addHours, isAfter, isToday, isSameDay } from 'date-fns';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams, useParams, useNavigate, Link as RouterLink, } from 'react-router-dom';
 import { Typography, Button, Breadcrumbs, Link } from '@mui/material';
@@ -18,25 +18,25 @@ const CourtSchedule = () => {
   //Date variable
   // const today = format(new Date(), "dd/MM");
   const [today, setToday] = useState(new Date());
-  const { user } = useAuth();
+  // const { user } = useAuth();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const courtName = searchParams.get("courtName");
   const orderCode = searchParams.get("orderCode");
   const status = searchParams.get("status");
 
-  // const user = {
-  //   id: "67beeeae8da067d693aecbab",
-  //   email: "minhlvhhe163657@fpt.edu.vn",
-  //   phone: "0941998256",
-  //   name: "milvh",
-  // };
+  const user = {
+    id: "67beeeae8da067d693aecbab",
+    email: "minhlvhhe163657@fpt.edu.vn",
+    phone: "0941998256",
+    name: "milvh",
+  };
 
   const orderData = {
     email: user.email,
     phone: user.phone,
     name: user.name,
-    userId: user._id,
+    userId: user.id,
     courtId: id,
     courtName: courtName,
     price: 5000,
@@ -52,15 +52,7 @@ const CourtSchedule = () => {
   const [daysOff] = useState([]);
   const [weekDays, setWeekDays] = useState({});
 
-  const [busyHours, setBusyHours] = useState({
-    0: [3, 4, 10],
-    1: [3, 4],
-    2: [3, 4],
-    3: [3, 4],
-    4: [3, 4],
-    5: [3, 4, 14],
-    6: [3, 4, 14],
-  });
+  const [busyHours, setBusyHours] = useState({});
 
   ///////////////////handle Axios///////////////////
   const updateBillByOrderCode = () => {
@@ -81,18 +73,67 @@ const CourtSchedule = () => {
 
   const getAllBillByCourtIdAndDate = (weekDays) => {
 
+
+    // init variable
+    let lastDayOfWeek = Object.entries(weekDays).at(-1); // Lấy phần tử cuối cùng
+    let firstDayOfWeek = Object.entries(weekDays).at(1); // Lấy phần tử cuối cùng
+    let lastDayOfWeekParese = parse(lastDayOfWeek[1], "EEEE - dd/MM", new Date())
+    let firstDayOfWeekParese = parse(firstDayOfWeek[1], "EEEE - dd/MM", new Date())
+    let timeRentalParse = null
+    let billOfWeek =[];
+    let billList = [];
+
     axios
       .get(apiUrl(routes.BILL, methods.GET_ALL_BY_DATE, id))
       .then((response) => {
-        console.log("123")
-        console.log(response.data)
-        console.log("weekDays: ", weekDays)
-        console.log("busyhours: ", busyHours)
-        // const timeRentalList = 
         
-        // const busyHours = {};
+        billList = response.data.billList
+        //check schedule this week or next week
+        if(isAfter(currentDate, firstDayOfWeekParese)){
+          //set bill list:  all bill of this week
+          billOfWeek = billList.reduce((acc, bill) => {
+            timeRentalParse = parse(bill.time_rental, "dd/MM/yyyy HH:mm:ss", new Date())
+            if(isBefore(currentDate, timeRentalParse) && isAfter(lastDayOfWeekParese, timeRentalParse) || isToday(timeRentalParse) || isSameDay(lastDayOfWeekParese, timeRentalParse)){
+              acc.push(bill.time_rental)
+            }
+            return acc
+          }, [])
+        }else{
+          //set bill list:  all bill of this week
+          billOfWeek = billList.reduce((acc, bill) => {
+            timeRentalParse = parse(bill.time_rental, "dd/MM/yyyy HH:mm:ss", new Date())
+            if(isBefore(firstDayOfWeekParese, timeRentalParse) && isAfter(lastDayOfWeekParese, timeRentalParse) || isToday(timeRentalParse) || isSameDay(lastDayOfWeekParese, timeRentalParse)){
+              acc.push(bill.time_rental)
+            }
+            return acc
+            
+          }, [])
+        }
 
 
+        //Àter have billOfWeek => handle busyHours
+        const busyHours = Object.keys(weekDays).reduce((acc, key) => {
+
+          let dayParese = parse(weekDays[key], "EEEE - dd/MM", new Date())
+          acc[key] = [3, 4]; //default busy hour
+
+          //check list bill !== undefined
+          if(billOfWeek.length > 0){
+            billOfWeek.forEach((timeRental) => {
+                const timeRentalParse = parse(timeRental, "dd/MM/yyyy HH:mm:ss", new Date())
+                if(isSameDay(timeRentalParse, dayParese)){
+                  acc[key].push(timeRentalParse.getHours()) //add busy hour per day in week
+                  
+              }
+             
+            });
+
+          }
+          
+          return acc;
+        }, {});
+
+        setBusyHours(busyHours)
 
         // return response.data
       })
@@ -136,17 +177,12 @@ const CourtSchedule = () => {
       ...prevBusyHours,
       [clickedDay]: [...(prevBusyHours[clickedDay] || []), clickedHour],
     }));
-    
+
+    console.log("busyHours: ", busyHours)
 
     //set orderData
     orderData.timeRental = timeBookingFormat
     orderData.endTime = endTimeBooking
-    console.log(orderData)
-
-
-
-
-
 
     axios
       .post(apiUrl(routes.PAY, methods.CREATE_PAYMENT_LINK), orderData)
@@ -184,23 +220,23 @@ const CourtSchedule = () => {
         return accumulator;
       },object
     );
-    console.log(weekDays)
+    // console.log(weekDays)
     setWeekDays(weekDays);
 
-    const busyHours = {
-      0: [3, 4, 10],
-      1: [3, 4],
-      2: [3, 4],
-      3: [3, 4],
-      4: [3, 4],
-      5: [3, 4, 14],
-      6: [3, 4, 14],
-    }
-    setBusyHours(busyHours)
+    // const busyHours = {
+    //   0: [3, 4, 10],
+    //   1: [3, 4],
+    //   2: [3, 4],
+    //   3: [3, 4],
+    //   4: [3, 4],
+    //   5: [3, 4, 14],
+    //   6: [3, 4, 14],
+    // }
+    // setBusyHours(busyHours)
     setCurrentDate(new Date())
     // console.log(busyHours)
 
-    ////////////////////////////handle logic bill////////////////////////////
+    ////////////////////////////handle logic bill and busy hours////////////////////////////
 
     // console.log("orderCode", orderCode)    
     // console.log("orderCode", courtName)    
@@ -210,9 +246,10 @@ const CourtSchedule = () => {
       toast.error(`bạn đã huỷ đặt lịch`);
     }
 
-    const bills = getAllBillByCourtIdAndDate(weekDays)
+    // const bills = getAllBillByCourtIdAndDate(weekDays)
+     getAllBillByCourtIdAndDate(weekDays)
 
-    console.log(bills)
+    // console.log(bills)
 
 
   }, [today]);

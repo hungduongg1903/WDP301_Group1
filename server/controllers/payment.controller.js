@@ -35,7 +35,7 @@ const createPayment = async (req, res, next) => {
         buyerName: data.name,
         buyerEmail: data.email,
         buyerPhone: data.phone,
-        orderCode: 40,
+        orderCode: 41,
         items: [{name: data.courtId, price: data.price, quantity: 1}],
         returnUrl: `${YOUR_DOMAIN}/courts/schedule/${data.courtId}?courtName=${encodeURIComponent(data.courtName)}`,
         cancelUrl: `${YOUR_DOMAIN}/courts/schedule/${data.courtId}?courtName=${encodeURIComponent(data.courtName)}`,
@@ -61,7 +61,7 @@ const createPayment = async (req, res, next) => {
 };
 
 // webhook-url https using ngrok
-// https://3792-14-177-236-71.ngrok-free.app/api/payment/receive-hook
+//  https://7c84-14-177-236-71.ngrok-free.app/api/payment/receive-hook
 const webHook = async (req, res, next) => {
 
     // console.log(req.body)

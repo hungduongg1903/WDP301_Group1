@@ -90,7 +90,7 @@ const getAllBillsByCourtId = async (req, res, next) => {
 };
 
 
-const getAllBillsByCourtIdAndDate = async (req, res, next) => {
+const getAllBillsByCourtIdAndCurrentDate = async (req, res, next) => {
   try {
     const courtId = req.params.courtId;
     const currentDate = new Date()
@@ -114,7 +114,7 @@ const getAllBillsByCourtIdAndDate = async (req, res, next) => {
 
     return res.status(200).json({
       success: true,
-      billsList: newBills
+      billList: newBills
     });
   } catch (err) {
     console.error(err); 
@@ -288,7 +288,7 @@ const billController = {
   updateBill,
   updateBillByOrderCodePayOS,
   getAllBillsByCourtId,
-  getAllBillsByCourtIdAndDate,
+  getAllBillsByCourtIdAndCurrentDate,
   deleteBill,
 };
 
