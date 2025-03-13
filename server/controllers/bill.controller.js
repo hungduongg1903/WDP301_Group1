@@ -99,9 +99,10 @@ const getAllBillsByCourtIdAndCurrentDate = async (req, res, next) => {
     const bills = await Bill.find({court_id: courtId}).populate("court_id","court_name").populate("user_id", ["email", "phone", "name"]);
     // const bills = await Bill.find({});
     if (!bills.length) {
-      return res.status(404).json({
-        success: false,
-        message: "No bills found"
+      return res.status(200).json({
+        success: true,
+        billList: [],
+        message: "Bills empty"
       });
     }
 

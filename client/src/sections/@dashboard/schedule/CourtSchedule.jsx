@@ -6,7 +6,7 @@ import { Helmet } from 'react-helmet-async';
 import { useSearchParams, useParams, useNavigate, Link as RouterLink, } from 'react-router-dom';
 import { Typography, Button, Breadcrumbs, Link } from '@mui/material';
 import axios from 'axios';
-import { useAuth } from '../../../hooks/useAuth';
+import { useAuthStore } from '../../../store/authStore';
 import { apiUrl, routes, methods } from '../../../constants';
 import toast from 'react-hot-toast';
 
@@ -18,19 +18,13 @@ const CourtSchedule = () => {
   //Date variable
   // const today = format(new Date(), "dd/MM");
   const [today, setToday] = useState(new Date());
-  // const { user } = useAuth();
+  const { user } = useAuthStore();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const courtName = searchParams.get("courtName");
   const orderCode = searchParams.get("orderCode");
   const status = searchParams.get("status");
 
-  const user = {
-    id: "67beeeae8da067d693aecbab",
-    email: "minhlvhhe163657@fpt.edu.vn",
-    phone: "0941998256",
-    name: "milvh",
-  };
 
   const orderData = {
     email: user.email,
@@ -82,12 +76,13 @@ const CourtSchedule = () => {
     let timeRentalParse = null
     let billOfWeek =[];
     let billList = [];
-
+    
     axios
       .get(apiUrl(routes.BILL, methods.GET_ALL_BY_DATE, id))
       .then((response) => {
-        
+        console.log(123)
         billList = response.data.billList
+        console.log(billList)
         //check schedule this week or next week
         if(isAfter(currentDate, firstDayOfWeekParese)){
           //set bill list:  all bill of this week
@@ -109,7 +104,7 @@ const CourtSchedule = () => {
             
           }, [])
         }
-
+        console.log(123)
 
         //Àter have billOfWeek => handle busyHours
         const busyHours = Object.keys(weekDays).reduce((acc, key) => {
@@ -132,6 +127,7 @@ const CourtSchedule = () => {
           
           return acc;
         }, {});
+        console.log("busyHours: ", busyHours)
 
         setBusyHours(busyHours)
 

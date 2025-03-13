@@ -5,6 +5,7 @@ const { parse, addHours, format, isAfter } =  require("date-fns");
 const Bill = db.bill;
 
 
+
 const createPayment = async (req, res, next) => {
 
     /////////////init varible///////////////////////
@@ -35,7 +36,7 @@ const createPayment = async (req, res, next) => {
         buyerName: data.name,
         buyerEmail: data.email,
         buyerPhone: data.phone,
-        orderCode: 41,
+        orderCode: getRandomNumber(),
         items: [{name: data.courtId, price: data.price, quantity: 1}],
         returnUrl: `${YOUR_DOMAIN}/courts/schedule/${data.courtId}?courtName=${encodeURIComponent(data.courtName)}`,
         cancelUrl: `${YOUR_DOMAIN}/courts/schedule/${data.courtId}?courtName=${encodeURIComponent(data.courtName)}`,
@@ -61,7 +62,7 @@ const createPayment = async (req, res, next) => {
 };
 
 // webhook-url https using ngrok
-//  https://7c84-14-177-236-71.ngrok-free.app/api/payment/receive-hook
+// https://ce2d-14-177-236-71.ngrok-free.app/api/payment/receive-hook
 const webHook = async (req, res, next) => {
 
     // console.log(req.body)
@@ -108,6 +109,7 @@ const webHook = async (req, res, next) => {
         }
 
     }else{
+        console.log(123)
         return res.status(200).json({
             success: true,
             message: "connect success",
@@ -117,6 +119,10 @@ const webHook = async (req, res, next) => {
     
  
 };
+
+function getRandomNumber() {
+    return Math.floor(Math.random() * (9007199254740991 - 124)) + 124;
+}
 
 
 const paymentController = {
