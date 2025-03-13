@@ -55,6 +55,11 @@ export default function Nav({ openNav, onCloseNav }) {
     setOpen(null);
   };
 
+  // Filter navigation items based on user role
+  const filteredNavConfig = navConfig.filter(
+    (navItem) => !navItem.adminOnly || (user && user.isAdmin)
+  );
+
   const renderContent = (
     <Scrollbar
       sx={{
@@ -67,33 +72,22 @@ export default function Nav({ openNav, onCloseNav }) {
       </Box>
 
       <Box sx={{ mb: 5, mx: 2.5 }}>
-        {/* <Link underline="none"> */}
-        
-          <StyledAccount>
+        <StyledAccount>
           <Avatar src={user?.photo || '/default-photo-url.png'} alt={user?.name || 'User'} />
-          {/* <IconButton
-            onClick={handleOpen}
-            size="small"
-            color="primary"
-          > */}
-            <Box sx={{ ml: 2 }}>
-              <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
-                {user.name}
-              </Typography>
+          <Box sx={{ ml: 2 }}>
+            <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
+              {user.name}
+            </Typography>
 
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                {user.isAdmin ? "Admin" : user.isLibrarian ? "Librarian" : "Member"}
-              </Typography>
-            </Box>
-          {/* </IconButton> */}
-          </StyledAccount>
-        {/* </Link> */}
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              {user.isAdmin ? "Admin" : user.isLibrarian ? "Librarian" : "Member"}
+            </Typography>
+          </Box>
+        </StyledAccount>
       </Box>
 
       <NavSection
-        data={navConfig.filter(
-          (navLink) => user.isAdmin || !(navLink.title === 'Dashboard' || navLink.title === 'Users')
-        )}
+        data={filteredNavConfig}
       />
 
       <Box sx={{ flexGrow: 1 }} />
