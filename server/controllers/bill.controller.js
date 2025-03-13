@@ -278,6 +278,37 @@ const deleteBill = async (req, res, next) => {
   }
 };
 
+const getAllBillsByUserId = async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+    const bills = await Bill.find({user_id: userId})
+                           .populate("court_id","court_name")
+                           .populate("user_id", ["email", "phone", "name"])
+                           .sort({createdAt: -1}); // Sắp xếp theo thời gian tạo mới nhất
+    
+    if (!bills.length) {
+      return res.status(200).json({
+        success: true,
+        message: "No bills found for this user",
+        billsList: []
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      billsList: bills
+    });
+  } catch (err) {
+    console.error(err); 
+
+    return res.status(err.code || 400).json({
+      success: false,
+      message: err.message,
+      error: err
+    });
+  }
+};
+
 
 
 
@@ -291,6 +322,7 @@ const billController = {
   getAllBillsByCourtId,
   getAllBillsByCourtIdAndCurrentDate,
   deleteBill,
+  getAllBillsByUserId
 };
 
 module.exports = billController;

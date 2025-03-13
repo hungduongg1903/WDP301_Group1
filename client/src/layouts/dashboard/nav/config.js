@@ -2,8 +2,8 @@ import { FiBookOpen, FiCheckCircle, FiHome, FiList, FiLock, FiUsers, FiFile, FiD
 
 const navConfig = [
   {
-    title: 'Dashboard',
-    path: '/dashboard',
+    title: 'User Management',
+    path: '/usermanagement',
     icon: <FiHome />,
   },
   {

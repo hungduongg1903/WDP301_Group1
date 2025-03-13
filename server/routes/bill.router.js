@@ -20,5 +20,6 @@ router.put("/update/by/:orderCode", billController.updateBillByOrderCodePayOS)
 
 router.delete("/delete/:id", billController.deleteBill)
 
+router.get("/getAll/user/:userId", billController.getAllBillsByUserId)
 
 module.exports = router;
