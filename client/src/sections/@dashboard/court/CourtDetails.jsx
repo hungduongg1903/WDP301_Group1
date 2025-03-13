@@ -355,7 +355,7 @@ const CourtDetails = () => {
       
       <Grid container spacing={2} sx={{ mt: 4 }}>
         <Typography variant="h6" sx={{ mt: 2 }}>
-          Write a Review
+          Write a FeedBack
         </Typography>
         <Grid item xs={12} style={{ paddingLeft: '3rem' }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -375,7 +375,7 @@ const CourtDetails = () => {
             sx={{ mt: 2 }}
           />
           <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={addReview}>
-            Submit Review
+            Submit Feedback
           </Button>
         </Grid>
       </Grid>

@@ -19,6 +19,7 @@ import CourtSchedule from "./sections/@dashboard/schedule/CourtSchedule";
 import LibraryApp from "./layouts/dashboard";
 import LandingPage from "./pages/LandingPage";
 import UserProfile from "./pages/UserProfile";
+import UserManagement from "./pages/UserManagement";
 
 // protect routes that require authentication
 const ProtectedRoute = ({ children }) => {
@@ -90,14 +91,19 @@ function App() {
               </ProtectedRoute>
             }
           />
+          
+          {/* Cập nhật route UserManagement để sử dụng LibraryApp layout */}
           <Route
-            path="/dashboard"
+            path="/usermanagement"
             element={
               <ProtectedRoute>
                 <LibraryApp />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<UserManagement />} />
+          </Route>
+          
           {/* <Route path="/dashboard2" element={<LibraryApp />} /> */}
           <Route
             path="/courts"

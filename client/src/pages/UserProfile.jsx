@@ -22,6 +22,7 @@ import Label from "../components/label"
 import Iconify from "../components/iconify"
 import { apiUrl, methods, routes } from "../constants"
 import UserForm from "./UserFormForUser"
+import BookingHistoryModal from "./BookingHistoryModal" // Import BookingHistoryModal
 
 export default function UserProfile() {
   const { id } = useParams()
@@ -30,6 +31,7 @@ export default function UserProfile() {
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isUpdateForm, setIsUpdateForm] = useState(false)
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false) // Thêm state cho modal history
   const theme = useTheme()
 
   const modalStyle = {
@@ -70,7 +72,6 @@ export default function UserProfile() {
   }, [getUser])
 
   const updateUser = () => {
-
     axios
       .put(apiUrl(routes.USER, `${methods.PUT}/${id}`), user)
       .then((response) => {
@@ -102,8 +103,14 @@ export default function UserProfile() {
     setIsUpdateForm(true)
   }
 
+  // Sửa hàm này để mở modal booking history thay vì chuyển trang
   const handleOpenHistory = () => {
-    navigate(`/userprofile/history/${id}`)
+    setIsHistoryModalOpen(true)
+  }
+
+  // Thêm hàm để đóng modal booking history
+  const handleCloseHistoryModal = () => {
+    setIsHistoryModalOpen(false)
   }
 
   const handleCloseModal = () => {
@@ -416,6 +423,7 @@ export default function UserProfile() {
           </Stack>
         </Stack>
 
+        {/* Tích hợp form cập nhật người dùng */}
         <UserForm
           isUpdateForm={isUpdateForm}
           isModalOpen={isModalOpen}
@@ -424,8 +432,14 @@ export default function UserProfile() {
           setUser={setUser}
           handleUpdateUser={updateUser}
         />
+
+        {/* Thêm Modal hiển thị lịch sử đặt sân */}
+        <BookingHistoryModal 
+          isOpen={isHistoryModalOpen} 
+          onClose={handleCloseHistoryModal} 
+          userId={id} 
+        />
       </Container>
     </Paper>
   )
 }
-
