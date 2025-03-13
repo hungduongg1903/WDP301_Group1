@@ -218,6 +218,7 @@ const CourtPage = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    clearForm();
   };
 
   const handleOpenImportModal = () => {
@@ -370,15 +371,6 @@ const CourtPage = () => {
                 onClick={handleOpenModal}
               >
                 New Court
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<Iconify icon="eva:cloud-upload-outline" />}
-                onClick={() => {
-                  handleOpenImportModal();
-                }}
-              >
-                Import Courts
               </Button>
             </Stack>
           ) : null}
