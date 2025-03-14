@@ -35,6 +35,7 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
+  
   login: async (email, password) => {
     set({ isLoading: true, error: null });
     try {
@@ -52,12 +53,24 @@ export const useAuthStore = create((set) => ({
       });
       return response.data;
     } catch (error) {
+      console.error("Login error:", error.response?.data?.message || "Unknown error");
+      // Set the error message in the state without navigating away or reloading
       set({
         error: error.response?.data?.message || "Error logging in",
         isLoading: false,
+        isAuthenticated: false,
+        user: null
       });
-      return null; // Instead of throwing, return null
+      // Return the error object instead of null for better error handling
+      return { 
+        success: false, 
+        message: error.response?.data?.message || "Error logging in" 
+      };
     }
+  },
+
+  clearError: () => {
+    set({ error: null });
   },
 
   logout: async () => {

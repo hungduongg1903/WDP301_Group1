@@ -71,6 +71,11 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+    // Check if user account is active
+    if (user.status === 'inactive') {
+      return res.status(403).json({ message: "Tài khoản của bạn đã bị hạn chế" });
+    }
+
     const isPasswordCorrect = await bcryptjs.compare(password, user.password);
     if (!isPasswordCorrect) {
       return res.status(400).json({ message: "Invalid credentials" });
@@ -88,6 +93,8 @@ const login = async (req, res) => {
         email: user.email,
         name: user.name,
         isVerified: user.isVerified,
+        status: user.status,
+        isAdmin: user.isAdmin
       },
     });
   } catch (error) {

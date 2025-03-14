@@ -1,149 +1,154 @@
-import { useState } from "react";
-import { useAuthStore } from "../store/authStore";
+import React, { useState, useEffect } from 'react';
+import { useAuthStore } from '../store/authStore';
 import {
+  Container,
+  Box,
+  Typography,
   TextField,
   Button,
+  Alert,
+  Paper,
   CircularProgress,
-  Typography,
   Link,
-  Box,
-} from "@mui/material";
-import { Mail, Lock } from "lucide-react";
+} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
-const LoginPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showError, setShowError] = useState(false);
+  
+  const navigate = useNavigate();
+  
+  const { 
+    login, 
+    isLoading, 
+    error, 
+    isAuthenticated,
+    user,
+    clearError 
+  } = useAuthStore();
 
-  const { login, isLoading, error } = useAuthStore();
+  // Clear error when component mounts or unmounts
+  useEffect(() => {
+    clearError();
+    return () => clearError();
+  }, [clearError]);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    const data = await login(email, password);
-    // Get the user data from localStorage
-    const user = JSON.parse(localStorage.getItem("user"));
-
-    if (user !== null) {
-      // Check if the user is an admin
+  // Redirect if already authenticated - with role-based routing
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      // Kiểm tra vai trò và điều hướng tương ứng
       if (user.isAdmin) {
-        window.location.href = "/dashboard";
+        navigate('/admin/dashboard'); // Hoặc trang admin thích hợp
       } else {
-        window.location.href = "/courts";
+        navigate('/member/dashboard'); // Hoặc trang member thích hợp
       }
+    }
+  }, [isAuthenticated, user, navigate]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent default form submission (prevents page reload)
+    
+    // Validate inputs
+    if (!email || !password) {
+      setShowError(true);
+      return;
+    }
+    
+    try {
+      // Call login function from authStore
+      const result = await login(email, password);
+      
+      // If login successful and no errors
+      if (result && result.success) {
+        // Điều hướng dựa trên vai trò được thực hiện trong useEffect
+        // Do không có truy cập ngay lập tức đến user.isAdmin
+      } else {
+        // Show error but don't reload page
+        setShowError(true);
+      }
+    } catch (err) {
+      // Show error but don't reload page
+      setShowError(true);
     }
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh", // Ensure it covers the entire screen height
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Box
-        sx={{
-          maxWidth: 400,
-          width: "100%",
-          padding: 4,
-          backgroundColor: "white", // White background for the form
-          borderRadius: 2,
-          boxShadow: 3,
-        }}
-      >
-        <Typography
-          variant="h4"
-          align="center"
+    <Container maxWidth="sm">
+      <Paper elevation={3} sx={{ mt: 8, p: 4, borderRadius: 2 }}>
+        <Box
           sx={{
-            fontWeight: "bold",
-            marginBottom: 3,
-            background:
-              "linear-gradient(to right,rgb(52, 137, 211),rgb(16, 134, 185))",
-            backgroundClip: "text",
-            color: "transparent",
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
           }}
         >
-          Welcome Back
-        </Typography>
-
-        <form onSubmit={handleLogin}>
-          <TextField
-            fullWidth
-            label="Email Address"
-            type="email"
-            variant="outlined"
-            margin="normal"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            InputProps={{
-              startAdornment: <Mail sx={{ color: "gray", marginRight: 1 }} />,
-            }}
-          />
-
-          <TextField
-            fullWidth
-            label="Password"
-            type="password"
-            variant="outlined"
-            margin="normal"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            InputProps={{
-              startAdornment: <Lock sx={{ color: "gray", marginRight: 1 }} />,
-            }}
-          />
-
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            marginBottom={2}
-          >
-            <Link href="/forgot-password" variant="body2" color="textSecondary">
-              Forgot password?
-            </Link>
-          </Box>
-
-          {error && (
-            <Typography color="error" variant="body2" gutterBottom>
-              {error}
-            </Typography>
-          )}
-
-          <Button
-            fullWidth
-            variant="contained"
-            color="success"
-            type="submit"
-            disabled={isLoading}
-            sx={{
-              padding: "12px 0",
-              fontWeight: "bold",
-              marginTop: 2,
-              background:
-                "linear-gradient(to right,rgb(52, 137, 211),rgb(16, 134, 185))",
-              "&:hover": { backgroundColor: "#10b981" },
-            }}
-          >
-            {isLoading ? (
-              <CircularProgress size={24} sx={{ color: "white" }} />
-            ) : (
-              "Login"
-            )}
-          </Button>
-        </form>
-
-        <Box sx={{ display: "flex", justifyContent: "center", marginTop: 2 }}>
-          <Typography variant="body2" color="textSecondary">
-            Don't have an account?{" "}
-            <Link href="/signup" color="rgb(52, 137, 211)">
-              Sign up
-            </Link>
+          <Typography component="h1" variant="h5" fontWeight="bold" mb={3}>
+            Đăng nhập
           </Typography>
+          
+          {/* Error Alert */}
+          {error && showError && (
+            <Alert 
+              severity="error" 
+              sx={{ width: '100%', mb: 2 }}
+              onClose={() => setShowError(false)}
+            >
+              {error}
+            </Alert>
+          )}
+          
+          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email"
+              name="email"
+              autoComplete="email"
+              autoFocus
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Mật khẩu"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2, py: 1.5, borderRadius: 2, fontWeight: 'bold' }}
+              disabled={isLoading}
+            >
+              {isLoading ? <CircularProgress size={24} /> : 'Đăng Nhập'}
+            </Button>
+            
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+              <Link href="/forgot-password" variant="body2">
+                Quên mật khẩu?
+              </Link>
+              <Link href="/register" variant="body2">
+                Chưa có tài khoản? Đăng ký
+              </Link>
+            </Box>
+          </Box>
         </Box>
-      </Box>
-    </Box>
+      </Paper>
+    </Container>
   );
 };
 
-export default LoginPage;
+export default Login;
