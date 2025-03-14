@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema(
     isAdmin: { type: Boolean, required: true, default: false },
     // photo_url: { type: String, required: false, nullable: true },
     dob: { type: Date, default: null },
+    status: { type: String, enum: ['active', 'inactive'], default: 'active' }, // Added status field
   
     lastLoginDate: { type: Date, default: Date.now },
     isVerified: { type: Boolean, default: false },

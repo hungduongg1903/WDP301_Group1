@@ -58,6 +58,7 @@ export default function UserManagement() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isUserFormOpen, setIsUserFormOpen] = useState(false)
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false)
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false) // New state for status dialog
   const [actionAnchorEl, setActionAnchorEl] = useState(null)
   const [actionUser, setActionUser] = useState(null)
   const [snackbar, setSnackbar] = useState({
@@ -139,6 +140,62 @@ export default function UserManagement() {
 
   const handleCloseRoleDialog = () => {
     setIsRoleDialogOpen(false)
+  }
+
+  // Status Dialog - New functions
+  const handleOpenStatusDialog = (user) => {
+    setSelectedUser(user)
+    setIsStatusDialogOpen(true)
+    handleCloseActionMenu()
+  }
+
+  const handleCloseStatusDialog = () => {
+    setIsStatusDialogOpen(false)
+  }
+
+  const handleChangeStatus = (status) => {
+    if (!selectedUser) return;
+    
+    const url = apiUrl(routes.USER, methods.PUT, selectedUser._id);
+    console.log("Updating user status using URL:", url);
+    console.log("User ID:", selectedUser._id);
+    console.log("Setting status to:", status);
+    
+    axios
+      .put(
+        url,
+        { status: status },
+        { withCredentials: true }
+      )
+      .then((response) => {
+        if (response.data.success) {
+          setSnackbar({
+            open: true,
+            message: `User status updated to ${status} successfully`,
+            severity: "success",
+          });
+          fetchUsers();
+        } else {
+          console.error("Server returned success=false:", response.data);
+          setSnackbar({
+            open: true,
+            message: `Failed to update user status: ${response.data.message || "Unknown error"}`,
+            severity: "error",
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Error updating user status:", error);
+        console.error("Response data:", error.response?.data);
+        setSnackbar({
+          open: true,
+          message: `Failed to update user status: ${error.response?.data?.message || error.message || "Unknown error"}`,
+          severity: "error",
+        });
+      })
+      .finally(() => {
+        handleCloseStatusDialog();
+      });
   }
 
   const handleChangeRole = (isAdmin) => {
@@ -246,6 +303,7 @@ export default function UserManagement() {
       dob: new Date(),
       password: "",
       isAdmin: false,
+      status: "active", // Set default status to active
     })
     setIsUserFormOpen(true)
   }
@@ -388,6 +446,7 @@ export default function UserManagement() {
                 <TableCell sx={{ fontWeight: "bold" }}>Email</TableCell>
                 <TableCell sx={{ fontWeight: "bold" }}>Phone</TableCell>
                 <TableCell sx={{ fontWeight: "bold" }}>Role</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
                 <TableCell sx={{ fontWeight: "bold" }}>Date of Birth</TableCell>
                 <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>
               </TableRow>
@@ -419,6 +478,11 @@ export default function UserManagement() {
                     <TableCell>
                       <Label color={user.isAdmin ? "error" : "success"}>
                         {user.isAdmin ? "Admin" : "Member"}
+                      </Label>
+                    </TableCell>
+                    <TableCell>
+                      <Label color={user.status === 'inactive' ? "error" : "success"}>
+                        {user.status || 'active'}
                       </Label>
                     </TableCell>
                     <TableCell>
@@ -469,6 +533,10 @@ export default function UserManagement() {
         <MenuItem onClick={() => handleOpenRoleDialog(actionUser)} sx={{ color: theme.palette.primary.main }}>
           <Iconify icon="mdi:account-convert" sx={{ mr: 2 }} />
           Change Role
+        </MenuItem>
+        <MenuItem onClick={() => handleOpenStatusDialog(actionUser)} sx={{ color: theme.palette.warning.main }}>
+          <Iconify icon="mdi:account-lock" sx={{ mr: 2 }} />
+          Change Status
         </MenuItem>
         {actionUser && !actionUser.isAdmin && (
           <MenuItem onClick={() => handleOpenDeleteDialog(actionUser)} sx={{ color: theme.palette.error.main }}>
@@ -556,6 +624,57 @@ export default function UserManagement() {
         </DialogActions>
       </Dialog>
 
+      {/* Status Change Dialog - New dialog */}
+      <Dialog
+        open={isStatusDialogOpen}
+        onClose={handleCloseStatusDialog}
+        PaperProps={{ sx: { borderRadius: 2 } }}
+      >
+        <DialogTitle>Change User Status</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Change status for user <strong>{selectedUser?.name}</strong>:
+          </DialogContentText>
+          <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'center' }}>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={() => handleChangeStatus('active')}
+              startIcon={<Iconify icon="mdi:account-check" />}
+              sx={{
+                px: 3,
+                py: 1,
+                borderRadius: 2,
+                fontWeight: "bold",
+                boxShadow: theme.shadows[3],
+              }}
+            >
+              Set as Active
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => handleChangeStatus('inactive')}
+              startIcon={<Iconify icon="mdi:account-lock" />}
+              sx={{
+                px: 3,
+                py: 1,
+                borderRadius: 2,
+                fontWeight: "bold",
+                boxShadow: theme.shadows[3],
+              }}
+            >
+              Set as Inactive
+            </Button>
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button variant="outlined" onClick={handleCloseStatusDialog}>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* User Form Dialog */}
       {selectedUser && (
         <Dialog
@@ -627,6 +746,27 @@ export default function UserManagement() {
                     sx={{ borderRadius: 2 }}
                   >
                     Member
+                  </Button>
+                </Stack>
+
+                {/* Add status selection to form */}
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Typography>User Status:</Typography>
+                  <Button
+                    variant={selectedUser.status === 'active' ? "contained" : "outlined"}
+                    color="success"
+                    onClick={() => setSelectedUser({ ...selectedUser, status: 'active' })}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    Active
+                  </Button>
+                  <Button
+                    variant={selectedUser.status === 'inactive' ? "contained" : "outlined"}
+                    color="error"
+                    onClick={() => setSelectedUser({ ...selectedUser, status: 'inactive' })}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    Inactive
                   </Button>
                 </Stack>
               </Stack>
