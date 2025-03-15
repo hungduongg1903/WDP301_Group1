@@ -52,13 +52,37 @@ export default function BookingHistoryModal({ isOpen, onClose, userId }) {
 
     try {
       const response = await axios.get(url, { withCredentials: true })
-      setBills(response.data.billsList || [])
+      const allBills = response.data.billsList || []
+      
+      // Lọc bill chỉ lấy những ngày đã trôi qua
+      const pastBills = filterPastBills(allBills)
+      setBills(pastBills)
       setLoading(false)
     } catch (error) {
       console.log("API Error:", error)
       toast.error("Failed to fetch booking history")
       setLoading(false)
     }
+  }
+
+  // Hàm để lọc những bill có ngày đã trôi qua
+  const filterPastBills = (billsList) => {
+    const currentDate = new Date()
+    
+    return billsList.filter(bill => {
+      if (!bill.time_rental) return false
+      
+      // Parse date từ format "dd/MM/yyyy HH:mm:ss"
+      const [datePart, timePart] = bill.time_rental.split(' ')
+      const [day, month, year] = datePart.split('/')
+      const [hours, minutes, seconds] = timePart.split(':')
+      
+      // JavaScript month is 0-based, so we subtract 1 from month
+      const rentalDate = new Date(year, month - 1, day, hours, minutes, seconds)
+      
+      // Trả về true nếu ngày thuê đã trôi qua
+      return rentalDate < currentDate
+    })
   }
 
   useEffect(() => {
@@ -68,27 +92,34 @@ export default function BookingHistoryModal({ isOpen, onClose, userId }) {
   }, [isOpen, userId])
 
   const getStatusColor = (status) => {
-    switch (status) {
+    // Chuyển đổi status sang chữ in hoa để xử lý nhất quán
+    const upperStatus = status?.toUpperCase() || "";
+    
+    switch (upperStatus) {
       case "SUCCESS":
         return {
           color: "success",
           icon: "eva:checkmark-circle-fill",
+          displayText: "PAID" // Thay đổi hiển thị thành PAID
         }
       case "PENDING":
         return {
           color: "warning",
           icon: "eva:clock-fill",
+          displayText: "PENDING"
         }
       case "CANCELLED":
       case "FAILED":
         return {
           color: "error",
           icon: "eva:close-circle-fill",
+          displayText: upperStatus
         }
       default:
         return {
           color: "info",
           icon: "eva:info-fill",
+          displayText: status
         }
     }
   }
@@ -141,7 +172,7 @@ export default function BookingHistoryModal({ isOpen, onClose, userId }) {
           <Box sx={{ textAlign: "center", py: 5 }}>
             <Iconify icon="eva:calendar-outline" width={64} height={64} sx={{ color: "text.secondary", mb: 2 }} />
             <Typography variant="h6" color="text.secondary">
-              No booking history found
+              No past booking history found
             </Typography>
           </Box>
         ) : (
@@ -186,7 +217,7 @@ export default function BookingHistoryModal({ isOpen, onClose, userId }) {
                         }}
                       >
                         <Iconify icon={statusConfig.icon} sx={{ mr: 0.5, width: 16, height: 16 }} />
-                        {bill.status}
+                        {statusConfig.displayText} {/* Sử dụng displayText thay vì status trực tiếp */}
                       </Label>
                     </Box>
                     
