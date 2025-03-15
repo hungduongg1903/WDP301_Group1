@@ -6,7 +6,7 @@ import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
 import { 
   Container, Typography, Box, Button, CircularProgress, Grid, Avatar, 
   TextField, Breadcrumbs, Link, IconButton, Dialog, DialogActions, 
-  DialogContent, DialogContentText, DialogTitle 
+  DialogContent, DialogContentText, DialogTitle, Card, Divider, Paper
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import shuffle from 'lodash.shuffle';
@@ -18,10 +18,22 @@ import { useAuthStore } from '../../../store/authStore';
 // Import icons for edit and delete actions
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import InfoIcon from '@mui/icons-material/Info';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import DescriptionIcon from '@mui/icons-material/Description';
+import PlaceIcon from '@mui/icons-material/Place';
 
 const TruncatedTypography = styled(Typography)({
   color: 'black',
 });
+
+const InfoSection = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+  borderRadius: '8px',
+}));
 
 const CourtDetails = () => {
   const { user } = useAuthStore();
@@ -249,7 +261,9 @@ const CourtDetails = () => {
   if (isLoading) {
     return (
       <Container>
-        <CircularProgress />
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <CircularProgress />
+        </Box>
       </Container>
     );
   }
@@ -257,7 +271,7 @@ const CourtDetails = () => {
   if (!court) {
     return (
       <Container>
-        <Typography variant="h5">Court not found</Typography>
+        <Typography variant="h5">Không tìm thấy thông tin sân</Typography>
       </Container>
     );
   }
@@ -289,165 +303,214 @@ const CourtDetails = () => {
   const isUserReview = (reviewUserId) => {
     return user && user._id === reviewUserId;
   };
-  
-  // Debug function to check review data
-  const debugReview = (review) => {
-    console.log('Review data:', {
-      id: review.feedback_id,
-      content: review.content,
-      userName: review.userName,
-      userId: review.userId
-    });
-    console.log('Current user ID:', user?._id);
-    console.log('Can edit?', review.userId === user?._id);
-  };
 
   return (
     <Container>
       <Helmet>
-        <title>{court.court_name} - Court Details</title>
+        <title>{court.court_name} - Chi tiết sân</title>
       </Helmet>
 
       <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
         <Link component={RouterLink} to="/">
-          Dashboard
+          Trang chủ
         </Link>
         <Link component={RouterLink} to="/courts">
-          Courts
+          Danh sách sân
         </Link>
         <Typography color="text.primary">{court.court_name}</Typography>
       </Breadcrumbs>
 
       <Button variant="outlined" color="primary" onClick={backToCourtPage} sx={{ mb: 2 }}>
-        Back to Courts
+        Quay lại danh sách sân
       </Button>
 
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={4}>
-          <ImageGallery items={images} />
-        </Grid>
-        <Grid item xs={12} sm={8} style={{ paddingLeft: '3rem' }}>
-          <Box>
-            <Typography variant="h3">{court.court_name}</Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12} sm={5} md={4}>
+          <Card>
+            <ImageGallery 
+              items={images} 
+              showPlayButton={false} 
+              showFullscreenButton={true}
+              showThumbnails={false}
+            />
+          </Card>
+          
+          <InfoSection elevation={1} sx={{ mt: 2 }}>
+            <Typography variant="subtitle1" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center' }}>
+              <AttachMoneyIcon sx={{ mr: 1 }} /> Thông tin giá
+            </Typography>
+            <Typography variant="body1" sx={{ mt: 1 }}>
+              Giá thuê: {court.price} 000 VND/Giờ
+            </Typography>
+            <Divider sx={{ my: 1 }} />
             
-            <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>
-              {court.court_name}
+            <Typography variant="subtitle1" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+              <AccessTimeIcon sx={{ mr: 1 }} /> Thời gian hoạt động
             </Typography>
-            <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>
-              Giá thuê sân: {court.price} 000 VND/Giờ
+            <Typography variant="body1" sx={{ mt: 1 }}>
+              {court.opening_hours || "06:00 - 22:00"}
             </Typography>
-            <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>Mở cửa: 6:00 sáng - 10:00 tối</Typography>
-            <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>Tiện nghi: Cho thuê vợt và bóng, Nhà vệ sinh tại chỗ, Đài phun nước, Khu vực ngồi có mái che</Typography>
-            <Typography variant="subtitle1" sx={{ color: '#888888', mt: 2 }}>An toàn: Sân được bảo trì thường xuyên để đảm bảo an toàn cho người chơi</Typography>
-
+            <Divider sx={{ my: 1 }} />
+            
+            <Typography variant="subtitle1" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+              <InfoIcon sx={{ mr: 1 }} /> Trạng thái
+            </Typography>
+            <Label 
+              color={court.status === "A" ? 'success' : 'error'} 
+              sx={{ mt: 1, display: 'inline-flex' }}
+            >
+              {court.status === "A" ? 'Có sẵn' : 'Không có sẵn'}
+            </Label>
+          </InfoSection>
+          
+          <Box sx={{ mt: 2 }}>
             <Link component={RouterLink} to={`/courts/schedule/${court._id}?courtName=${encodeURIComponent(court.court_name)}`}>
               <Button
                 variant="contained"
                 color="primary"
-                sx={{ mt: 2 }}
+                size="large"
+                fullWidth
               >
                 Đặt sân ngay
               </Button>
             </Link>
           </Box>
         </Grid>
-      </Grid>
-      
-      <Grid container spacing={2} sx={{ mt: 4 }}>
-        <Typography variant="h6" sx={{ mt: 2 }}>
-          Write a FeedBack
-        </Typography>
-        <Grid item xs={12} style={{ paddingLeft: '3rem' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Avatar alt={user?.name} src={user?.photoUrl} sx={{ mr: 2 }} />
-            <Typography variant="subtitle1" sx={{ color: '#888888' }}>
-              {user?.name}
+        
+        <Grid item xs={12} sm={7} md={8}>
+          <Card sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h4" component="h1" gutterBottom>
+              {court.court_name}
             </Typography>
-          </Box>
-          <TextField
-            id="standard-basic"
-            label="Your comment"
-            variant="standard"
-            fullWidth
-            rows={4}
-            value={review}
-            onChange={(e) => setReview(e.target.value)}
-            sx={{ mt: 2 }}
-          />
-          <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={addReview}>
-            Submit Feedback
-          </Button>
-        </Grid>
-      </Grid>
-
-      <Grid container spacing={2} sx={{ mt: 4 }}>
-        <Grid item xs={12}>
-          <Typography variant="h6" sx={{ mt: 2 }}>
-            Feedbacks
-          </Typography>
-          {reviews.map((review) => (
-            <Box key={review.feedback_id} sx={{ mt: 2, p: 2, border: '1px solid #ccc', borderRadius: '4px' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Avatar alt={review.userName} sx={{ mr: 2 }} />
-                  <Typography variant="subtitle1" sx={{ color: '#888888' }}>
-                    {review.userName}
-                  </Typography>
+            
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <DescriptionIcon sx={{ mr: 1 }} /> Mô tả sân
+              </Typography>
+              <Typography variant="body1" sx={{ whiteSpace: 'pre-line', mt: 1 }}>
+                {court.description || "Chưa có thông tin mô tả chi tiết về sân này. Vui lòng liên hệ với quản lý để biết thêm thông tin về cơ sở vật chất và tiện ích."}
+              </Typography>
+            </Box>
+            
+            
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <AccessTimeIcon sx={{ mr: 1 }} /> Giờ mở cửa & Lưu ý đặt sân
+              </Typography>
+              <Box sx={{ pl: 3 }}>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Giờ mở cửa:</strong> {court.opening_hours || "06:00 - 22:00"} (tất cả các ngày trong tuần)
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Giờ cao điểm:</strong> 17:00 - 21:00 (Thứ 2 - Thứ 6), 08:00 - 11:00 (Thứ 7, Chủ nhật)
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Thời gian đặt trước:</strong> Khuyến khích đặt sân trước ít nhất 24 giờ, đặc biệt vào giờ cao điểm
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Chính sách hủy:</strong> Hủy trước 4 tiếng được hoàn 100% tiền, hủy trước 2 tiếng được hoàn 50% tiền
+                </Typography>
+              </Box>
+            </Box>
+          </Card>
+          
+          {/* Feedback Section */}
+          <Card sx={{ p: 3 }}>
+            <Typography variant="h5" gutterBottom>
+              Đánh giá từ khách hàng
+            </Typography>
+            
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle1" gutterBottom>
+                Thêm đánh giá của bạn
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Avatar alt={user?.name} src={user?.photoUrl} sx={{ mr: 2 }} />
+                <Typography variant="subtitle1">
+                  {user?.name || 'Khách'}
+                </Typography>
+              </Box>
+              <TextField
+                id="review-input"
+                label="Nội dung đánh giá"
+                variant="outlined"
+                fullWidth
+                multiline
+                rows={3}
+                value={review}
+                onChange={(e) => setReview(e.target.value)}
+              />
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                <Button variant="contained" color="primary" onClick={addReview}>
+                  Gửi đánh giá
+                </Button>
+              </Box>
+            </Box>
+            
+            <Divider sx={{ my: 2 }} />
+            
+            <Typography variant="h6" gutterBottom>
+              {reviews.length > 0 ? 'Đánh giá gần đây' : 'Chưa có đánh giá nào'}
+            </Typography>
+            
+            {reviews.map((review) => (
+              <Box key={review.feedback_id} sx={{ mt: 2, p: 2, border: '1px solid #eee', borderRadius: '8px' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Avatar alt={review.userName} sx={{ mr: 2 }} />
+                    <Typography variant="subtitle1">
+                      {review.userName}
+                    </Typography>
+                  </Box>
+                  
+                  {user && user._id === review.userId && (
+                    <Box>
+                      <IconButton 
+                        size="small" 
+                        color="primary" 
+                        onClick={() => handleEditReview(review.feedback_id, review.content)}
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton 
+                        size="small" 
+                        color="error" 
+                        onClick={() => openDeleteDialog(review.feedback_id)}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  )}
                 </Box>
                 
-                {user && user._id === review.userId && (
-                  <Box>
-                    <IconButton 
-                      size="small" 
-                      color="primary" 
-                      onClick={() => {
-                        console.log('Editing review:', review.feedback_id);
-                        handleEditReview(review.feedback_id, review.content);
-                      }}
-                    >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton 
-                      size="small" 
-                      color="error" 
-                      onClick={() => {
-                        console.log('Attempting to delete review:', review.feedback_id);
-                        openDeleteDialog(review.feedback_id);
-                      }}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
+                {isEditing && editingReviewId === review.feedback_id ? (
+                  <Box sx={{ mt: 1 }}>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={2}
+                      value={editingReviewContent}
+                      onChange={(e) => setEditingReviewContent(e.target.value)}
+                      variant="outlined"
+                      size="small"
+                    />
+                    <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                      <Button size="small" onClick={cancelEditing} sx={{ mr: 1 }}>
+                        Hủy
+                      </Button>
+                      <Button size="small" variant="contained" color="primary" onClick={submitEditedReview}>
+                        Lưu
+                      </Button>
+                    </Box>
                   </Box>
+                ) : (
+                  <Typography variant="body1" sx={{ mt: 1 }}>
+                    {review.content}
+                  </Typography>
                 )}
               </Box>
-              
-              {isEditing && editingReviewId === review.feedback_id ? (
-                <Box sx={{ mt: 1 }}>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={2}
-                    value={editingReviewContent}
-                    onChange={(e) => setEditingReviewContent(e.target.value)}
-                    variant="outlined"
-                    size="small"
-                  />
-                  <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button size="small" onClick={cancelEditing} sx={{ mr: 1 }}>
-                      Hủy
-                    </Button>
-                    <Button size="small" variant="contained" color="primary" onClick={submitEditedReview}>
-                      Lưu
-                    </Button>
-                  </Box>
-                </Box>
-              ) : (
-                <Typography variant="body2" sx={{ mt: 1 }}>
-                  {review.content}
-                </Typography>
-              )}
-            </Box>
-          ))}
+            ))}
+          </Card>
         </Grid>
       </Grid>
 
@@ -459,11 +522,11 @@ const CourtDetails = () => {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          {"Xác nhận xóa đánh giá"}
+          {"Xác nhận xóa"}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Bạn có chắc chắn muốn xóa đánh giá này không? Hành động này không thể hoàn tác.
+            Bạn có chắc chắn muốn xóa đánh giá này? Hành động này không thể hoàn tác.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
