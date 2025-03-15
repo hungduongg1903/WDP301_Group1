@@ -17,8 +17,14 @@ const courtSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  
-
+  description: {
+    type: String,
+    default: ""
+  },
+  opening_hours: {
+    type: String,
+    default: "06:00 - 22:00"
+  }
 },{
   timestamps : true
 })
