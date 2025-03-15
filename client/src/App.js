@@ -20,6 +20,7 @@ import LibraryApp from "./layouts/dashboard";
 import LandingPage from "./pages/LandingPage";
 import UserProfile from "./pages/UserProfile";
 import UserManagement from "./pages/UserManagement";
+import BookingHistory from "./sections/booking/BookingHistory";
 
 // protect routes that require authentication
 const ProtectedRoute = ({ children }) => {
@@ -124,6 +125,15 @@ function App() {
               <RedirectAuthenticatedUser>
                 <ResetPasswordPage />
               </RedirectAuthenticatedUser>
+            }
+          />
+
+          <Route
+            path="/booking-history"
+            element={
+              <ProtectedRoute>
+                <BookingHistory />
+              </ProtectedRoute>
             }
           />
 

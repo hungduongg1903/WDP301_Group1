@@ -1,4 +1,4 @@
-import { FiBookOpen, FiCheckCircle, FiHome, FiList, FiLock, FiUsers, FiFile, FiDollarSign, FiLayout  } from 'react-icons/fi';
+import { FiBookOpen, FiCheckCircle, FiHome, FiList, FiLock, FiUsers, FiFile, FiDollarSign, FiLayout, FiCalendar } from 'react-icons/fi';
 
 const navConfig = [
   {
@@ -11,6 +11,11 @@ const navConfig = [
     title: 'Courts',
     path: '/courts',
     icon: <FiLayout  />,
+  },
+  {
+    title: 'Booking',
+    path: '/booking-history',
+    icon: <FiCalendar />,
   },
   // {
   //   title: 'Authors',
